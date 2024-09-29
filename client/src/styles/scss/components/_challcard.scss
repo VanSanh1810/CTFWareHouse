@@ -1,0 +1,23 @@
+.challcard {
+    .title {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        i {
+            color: rgb(0, 236, 0);
+            font-size: 1.5rem;
+        }
+        h6 {
+            color: rgb(134, 134, 134);
+        }
+    }
+
+    .challdetail {
+        h6 {
+            font-size: 1.7rem;
+        }
+    }
+}
+
+

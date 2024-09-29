@@ -1,0 +1,39 @@
+.chall-modal-body {
+    .title {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .desc {
+        p {
+            padding-left: 1rem;
+        }
+
+        h3 {
+            padding: 0;
+            border: none;
+            border-bottom: 1px solid #a5a5a5; /* Đường kẻ ngang */
+            padding-bottom: 10px;
+            font-size: 1.3rem;
+        }
+    }
+
+    .tag-list {
+        margin-bottom: 1rem;
+        span {
+            margin-right: 0.7em;
+            cursor: pointer;
+            transition: all 0.1s ease-in;
+        }
+        span:hover {
+            transform: scale(1.1);
+        }
+    }
+
+    h5 {
+        font-size: 1rem;
+        color: rgb(187, 187, 187);
+    }
+}

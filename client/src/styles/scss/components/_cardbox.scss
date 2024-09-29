@@ -1,0 +1,11 @@
+.cardbox {
+    background-color: rgb(245, 245, 245);
+    padding: 1rem;
+    border-radius: 1rem;
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.cardbox.selectable:hover {
+    box-shadow: 5px 4px 23px -10px rgba(0, 0, 0, 0.7);
+    cursor: pointer;
+}
