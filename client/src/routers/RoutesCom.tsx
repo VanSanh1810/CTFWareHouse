@@ -3,6 +3,7 @@ import { HomePage } from '../pages/home';
 import MainLayout from '../layouts/MainLayout';
 import { NotFoundPage } from '../pages/404';
 import { ChallPage } from '../pages/chall';
+import { ManagePage } from '../pages/manage';
 
 export const router = createBrowserRouter([
     {
@@ -18,6 +19,14 @@ export const router = createBrowserRouter([
         element: (
             <MainLayout>
                 <ChallPage />
+            </MainLayout>
+        ),
+    },
+    {
+        path: '/manage',
+        element: (
+            <MainLayout>
+                <ManagePage />
             </MainLayout>
         ),
     },

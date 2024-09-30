@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, useEffect } from 'react';
+import React, { ChangeEventHandler, useEffect, useState } from 'react';
 import { Badge, Button, Col, Container, Dropdown, Form, ListGroup, Modal, Row } from 'react-bootstrap';
 import { CardBox } from '../../components/CardBox';
 import { Pagination } from '../../components/Pagination';
@@ -30,6 +30,8 @@ const SearchFillter = (props: SearchFillterProps) => {
     // useSearchParams hook
     const [searchParams, setSearchParams] = useSearchParams();
 
+    const [selectedCate, setSelectedCate] = useState();
+
     // Lấy giá trị của tham số 'paramName'
 
     return (
@@ -41,9 +43,8 @@ const SearchFillter = (props: SearchFillterProps) => {
                     label="Hide Solved"
                     style={{ userSelect: 'none', fontWeight: 'bold' }}
                     onChange={(e) => {
-                        setSearchParams((preParam) => {
-                            return { ...preParam, hidesolve: e.currentTarget.checked ? '1' : '0' };
-                        });
+                        searchParams.set('hidesolve', e.currentTarget.checked ? '1' : '0');
+                        setSearchParams(searchParams);
                     }}
                 />
                 <Form.Check // prettier-ignore
@@ -52,16 +53,23 @@ const SearchFillter = (props: SearchFillterProps) => {
                     label="Show Bookmarked"
                     style={{ userSelect: 'none', fontWeight: 'bold' }}
                     onChange={(e) => {
-                        setSearchParams((preParam) => {
-                            return { ...preParam, bookmark: e.currentTarget.checked ? '1' : '0' };
-                        });
+                        searchParams.set('bookmark', e.currentTarget.checked ? '1' : '0');
+                        setSearchParams(searchParams);
                     }}
+                    defaultValue={searchParams.get('bookmark') ?? 1}
                 />
                 <h4 className="mt-4" style={{ userSelect: 'none' }}>
                     Category
                 </h4>
                 <ListGroup style={{ zIndex: -10 }}>
-                    <ListGroup.Item action onClick={() => {}} active>
+                    <ListGroup.Item
+                        action
+                        onClick={(e) => {
+                            searchParams.set('bookmark', e.currentTarget.checked ? '1' : '0');
+                            setSearchParams(searchParams);
+                        }}
+                        active
+                    >
                         All Category
                     </ListGroup.Item>
                     <ListGroup.Item action onClick={() => {}}>
@@ -91,7 +99,7 @@ const SearchFillter = (props: SearchFillterProps) => {
 const ChallList = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const queryPage = searchParams.get('page');
+    const queryPage = parseInt(searchParams.get('page') || '1');
     const queryCategory = searchParams.get('category');
     const queryHideSolve = searchParams.get('hidesolve');
     const queryBookmark = searchParams.get('bookmark');
@@ -99,29 +107,22 @@ const ChallList = () => {
     const [challList, setChallList] = React.useState([]);
 
     useEffect(() => {
-        const changePage = async () => {
-            let page: number;
-            if (!queryPage?.trim()) {
-                page = 1;
-            } else {
-                try {
-                    page = parseInt(queryPage.trim());
-                } catch (e) {
-                    page = 1;
-                }
-            }
-
-            //const response = await axiosInstance.get('ch');
-        };
-        //changePage();
-
         alert([queryPage, queryCategory, queryHideSolve, queryBookmark]);
     }, [queryPage, queryCategory, queryHideSolve, queryBookmark]);
+
+    const changePage = (value: number) => {
+        const newPageNum = queryPage + value;
+        console.log(newPageNum);
+        if (newPageNum > 0) {
+            searchParams.set('page', newPageNum.toString());
+            setSearchParams(searchParams);
+        }
+    };
 
     return (
         <Container fluid>
             <Row className="d-flex justify-content-center align-item-center">
-                <Pagination />
+                <Pagination changePageFunc={changePage} currentPage={queryPage} />
             </Row>
             <Row>
                 <Col xl={4} md={4} sm={6} className="mb-4">
@@ -129,7 +130,7 @@ const ChallList = () => {
                 </Col>
             </Row>
             <Row className="d-flex justify-content-center align-item-center">
-                <Pagination />
+                <Pagination changePageFunc={changePage} currentPage={queryPage} />
             </Row>
             {/* ------------------------------------MODAL---------------------------------------- */}
             <ChallModal />

@@ -3,6 +3,7 @@ import React from 'react';
 type Props = {
     type?: 'default' | 'icon';
     children: React.ReactNode;
+    onClickFunc?: () => void;
 };
 
 const Button = (props: Props) => {
@@ -10,9 +11,13 @@ const Button = (props: Props) => {
         <>
             {props.type ? (
                 props.type === 'icon' ? (
-                    <button className='iconbtn'>{props.children}</button>
+                    <button className="iconbtn" onClick={props.onClickFunc}>
+                        {props.children}
+                    </button>
                 ) : (
-                    <button className='defaultbtn'>{props.children}</button>
+                    <button className="defaultbtn" onClick={props.onClickFunc}>
+                        {props.children}
+                    </button>
                 )
             ) : (
                 <button>{props.children}</button>

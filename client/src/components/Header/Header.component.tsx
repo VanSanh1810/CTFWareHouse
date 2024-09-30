@@ -22,7 +22,7 @@ const Header = (props: Props) => {
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item href="#action5">Other</NavDropdown.Item>
                             </NavDropdown>
-                            <Nav.Link href="/account">Account</Nav.Link>
+                            <Nav.Link href="/manage">Manage</Nav.Link>
                         </Nav>
                         <Form className="d-flex">
                             <Form.Control
@@ -33,6 +33,11 @@ const Header = (props: Props) => {
                                 aria-label="Search"
                             />
                             <Button variant="outline-success">Search</Button>
+                        </Form>
+                        <Form className="d-flex">
+                            <Button variant="outline-primary">
+                                <i className="fa-solid fa-user"></i>
+                            </Button>
                         </Form>
                     </Navbar.Collapse>
                 </Container>
