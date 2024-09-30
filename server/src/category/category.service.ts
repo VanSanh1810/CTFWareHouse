@@ -50,19 +50,22 @@ export class CategoryService {
       const selectedCate = await this.cateRepository.findOneByOrFail({
         id: id,
       });
-      if (selectedCate.challenges.length > 0 || selectedCate.tags.length > 0) {
-        throw new HttpException(
+      if (
+        selectedCate.challenges?.length > 0 ||
+        selectedCate.tags?.length > 0
+      ) {
+        return new HttpException(
           'Category still have related data',
           HttpStatus.CONFLICT,
         );
       }
-      return await this.cateRepository.remove(selectedCate);
+      return await this.cateRepository.delete(selectedCate);
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
       }
       throw new HttpException(
-        'Internal Server Error',
+        `Internal Server Error ${e}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

@@ -18,7 +18,6 @@ export class TagController {
   constructor(private readonly tagService: TagService) {}
 
   @Post()
-  @UsePipes(new ValidationPipe())
   async create(@Body() createTagDto: CreateTagDto) {
     return await this.tagService.create(createTagDto);
   }
@@ -35,11 +34,11 @@ export class TagController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTagDto: UpdateTagDto) {
-    return this.tagService.update(+id, updateTagDto);
+    return this.tagService.update(id, updateTagDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.tagService.remove(+id);
+    return this.tagService.remove(id);
   }
 }

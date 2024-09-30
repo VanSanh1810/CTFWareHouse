@@ -16,8 +16,6 @@ export class CreateChallDto {
   @IsNotEmpty()
   sourceUrl: string;
 
-  staticFile?: string;
-
   @IsArray()
   @ArrayMinSize(1)
   tags: string[];

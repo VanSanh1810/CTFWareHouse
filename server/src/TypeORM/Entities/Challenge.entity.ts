@@ -8,22 +8,25 @@ export class Challenge extends AbstractEntity<Challenge> {
   @Column()
   challName: string;
 
-  @ManyToOne(() => Category, (cate) => cate.cateName)
+  @ManyToOne(() => Category, (cate) => cate.challenges)
   category: Category;
 
   @Column({ nullable: true })
   description: string;
 
+  // for ctf platform
   @Column()
   source: string;
-
   @Column()
   sourceUrl: string;
 
+  // for static project files
   @Column({ nullable: true })
-  staticFile: string;
+  staticFileUrl: string;
+  @Column({ nullable: true })
+  staticFileName: string;
 
-  @ManyToMany(() => Tag, (t) => t.challenges)
+  @ManyToMany(() => Tag, (tag) => tag.challenges)
   @JoinTable()
   tags: Tag[];
 }

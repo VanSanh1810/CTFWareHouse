@@ -4,6 +4,8 @@ import { DatabaseModule } from './database/database.module';
 import { TagModule } from './tag/tag.module';
 import { CategoryModule } from './category/category.module';
 import { ChallModule } from './chall/chall.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -12,6 +14,10 @@ import { ChallModule } from './chall/chall.module';
     TagModule,
     CategoryModule,
     ChallModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
   ],
   controllers: [],
   providers: [],

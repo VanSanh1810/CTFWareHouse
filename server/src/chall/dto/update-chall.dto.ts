@@ -1,4 +1,11 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateChallDto } from './create-chall.dto';
+export class UpdateChallDto {
+  challName?: string;
 
-export class UpdateChallDto extends PartialType(CreateChallDto) {}
+  category?: string;
+
+  description?: string;
+
+  source?: string;
+
+  sourceUrl?: string;
+}

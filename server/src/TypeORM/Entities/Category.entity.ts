@@ -8,9 +8,9 @@ export class Category extends AbstractEntity<Category> {
   @Column({ unique: true })
   cateName: string;
 
-  @OneToMany(() => Challenge, (chall) => chall.category, { cascade: true })
+  @OneToMany(() => Challenge, (chall) => chall.category)
   challenges: Challenge[];
 
-  @OneToMany(() => Tag, (chall) => chall.category, { cascade: true })
+  @OneToMany(() => Tag, (tag) => tag.category)
   tags: Tag[];
 }
