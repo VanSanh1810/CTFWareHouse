@@ -20,6 +20,9 @@ export class Challenge extends AbstractEntity<Challenge> {
   @Column()
   sourceUrl: string;
 
+  @Column({ nullable: true })
+  staticFile: string;
+
   @ManyToMany(() => Tag, (t) => t.challenges)
   @JoinTable()
   tags: Tag[];

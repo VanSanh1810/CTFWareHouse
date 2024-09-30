@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { TagModule } from './tag/tag.module';
 import { CategoryModule } from './category/category.module';
+import { ChallModule } from './chall/chall.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { CategoryModule } from './category/category.module';
     DatabaseModule,
     TagModule,
     CategoryModule,
+    ChallModule,
   ],
   controllers: [],
   providers: [],
