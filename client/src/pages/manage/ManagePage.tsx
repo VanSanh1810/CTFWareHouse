@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Col, Container, ListGroup, Modal, Row } from 'react-bootstrap';
+import React, { FormEventHandler, useEffect, useState } from 'react';
+import { Button, Col, Container, Form, ListGroup, Modal, Row } from 'react-bootstrap';
 import { CardBox } from '../../components/CardBox';
 import ManageTabLayout from '../../layouts/ManageTabLayout';
 import { useSearchParams } from 'react-router-dom';
 import { DataList } from '../../components/DataList';
+import { Bounce, toast } from 'react-toastify';
+import axiosInstance from '../../services/Axios';
+import { CreateCateDto } from '../../types/Dtos/create-category.dto';
 
 type Props = {};
 
@@ -94,19 +97,195 @@ const SideNav = (props: SideNavProps) => {
 
 const CategoryTab = () => {
     const [modalCreate, setModalCreate] = React.useState<boolean>(false);
+    const [modalEdit, setModalEdit] = React.useState<string>('');
+    const [modalDelete, setModalDelete] = React.useState<string>('');
+
+    const [reloadAction, setReloadAction] = React.useState<boolean>(false);
+    const [listCate, setListCate] = React.useState<string[]>([]);
+    ////////////////////////////////
+
+    const createCateHandler: FormEventHandler<HTMLFormElement> = async (e) => {
+        e.preventDefault();
+        const form = e.currentTarget as HTMLFormElement;
+        const cateNameInput = form.querySelector('input[name="cateName"]') as HTMLInputElement;
+
+        if (cateNameInput && cateNameInput.value.trim()) {
+            // console.log(cateNameInput.value);
+            try {
+                const createCateDto: CreateCateDto = { cateName: cateNameInput.value };
+                const response = await axiosInstance.post('/category', createCateDto);
+                toast.success(`${response.status}`, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+                setReloadAction((r) => !r);
+                setModalCreate(false);
+            } catch (e) {
+                toast.error(`${e}`, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+            }
+        } else {
+            toast.error('Please provide category name !', {
+                position: 'top-right',
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light',
+                transition: Bounce,
+            });
+        }
+    };
+
+    const editCateHandler: FormEventHandler<HTMLFormElement> = async (e) => {
+        e.preventDefault();
+        const form = e.currentTarget as HTMLFormElement;
+        const cateNameInput = form.querySelector('input[name="cateName"]') as HTMLInputElement;
+
+        if (cateNameInput && cateNameInput.value.trim() && modalEdit) {
+            // console.log(cateNameInput.value);
+            try {
+                const createCateDto: CreateCateDto = { cateName: cateNameInput.value };
+                const response = await axiosInstance.patch(`/category/${modalEdit}`, createCateDto);
+                toast.success(`${response.status}`, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+                setReloadAction((r) => !r);
+                setModalEdit('');
+            } catch (e) {
+                toast.error(`${e}`, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+            }
+        } else {
+            toast.error('Please provide category name !', {
+                position: 'top-right',
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light',
+                transition: Bounce,
+            });
+        }
+    };
+
+    const deleteCateHandler = async () => {
+        if (modalDelete) {
+            // console.log(cateNameInput.value);
+            try {
+                const response = await axiosInstance.delete(`/category/${modalDelete}`);
+                toast.success(`${response.status}`, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+                setReloadAction((r) => !r);
+                setModalDelete('');
+            } catch (e) {
+                toast.error(`${e}`, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+            }
+        } else {
+            toast.error('Please provide category name !', {
+                position: 'top-right',
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light',
+                transition: Bounce,
+            });
+        }
+    };
+
+    /////////////////////////////////////////
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axiosInstance.get('/category');
+                setListCate([...response.data]);
+            } catch (e) {
+                toast.error(`${e}`, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+            }
+        };
+        fetchCategories();
+    }, [reloadAction]);
 
     return (
         <ManageTabLayout title="Category" createNewFunc={() => setModalCreate(true)}>
             <h2>123</h2>
             <DataList
-                listHeader={['a', 'b', 'c']}
-                listKey={['a', 'b', 'c']}
-                datas={[
-                    { a: 1, b: 2, c: 3 },
-                    { a: 1, b: 2, c: 3 },
-                ]}
+                listHeader={['ID', 'Name']}
+                listKey={['id', 'cateName']}
+                datas={[...listCate]}
+                editHandler={(id: string) => setModalEdit(id)}
+                deleteHandler={(id: string) => setModalDelete(id)}
             />
-            {/*  */}
+            {/* Create Modal */}
             <Modal
                 show={modalCreate}
                 onHide={() => setModalCreate(false)}
@@ -115,17 +294,74 @@ const CategoryTab = () => {
                 centered
             >
                 <Modal.Header closeButton>
-                    <Modal.Title id="contained-modal-title-vcenter">Modal heading</Modal.Title>
+                    <Modal.Title id="contained-modal-title-vcenter">Create new Category</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <h4>Centered Modal</h4>
-                    <p>
-                        Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget
-                        quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-                    </p>
+                    <Form onSubmit={createCateHandler}>
+                        <Form.Group className="mb-3" controlId="cateName">
+                            <Form.Label>Category name</Form.Label>
+                            <Form.Control type="text" placeholder="Enter category name" name="cateName" />
+                        </Form.Group>
+                        <Button variant="primary" type="submit">
+                            Create
+                        </Button>
+                    </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={() => setModalCreate(false)}>Close</Button>
+                    <Button variant="secondary" onClick={() => setModalCreate(false)}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            {/* Edit Modal */}
+            <Modal
+                show={!!modalEdit}
+                onHide={() => setModalEdit('')}
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title id="contained-modal-title-vcenter">Edit Category</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={editCateHandler}>
+                        <Form.Group className="mb-3" controlId="cateName">
+                            <Form.Label>Category name</Form.Label>
+                            <Form.Control type="text" placeholder="Enter category name" name="cateName" />
+                        </Form.Group>
+                        <Button variant="primary" type="submit">
+                            Save
+                        </Button>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setModalEdit('')}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            {/* Delete Modal */}
+            <Modal
+                show={!!modalDelete}
+                onHide={() => setModalDelete('')}
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title id="contained-modal-title-vcenter">Delete Category</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>You sure you want to delete this category</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" onClick={deleteCateHandler}>
+                        Delete
+                    </Button>
+                    <Button variant="secondary" onClick={() => setModalDelete('')}>
+                        Close
+                    </Button>
                 </Modal.Footer>
             </Modal>
         </ManageTabLayout>
