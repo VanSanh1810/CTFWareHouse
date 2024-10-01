@@ -40,7 +40,7 @@ export class TagService {
   }
 
   async findAll() {
-    return await this.tagRepository.find();
+    return await this.tagRepository.find({ relations: ['category'] });
   }
 
   async findOne(id: string) {
