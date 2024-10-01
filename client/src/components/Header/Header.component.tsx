@@ -34,7 +34,7 @@ const Header = (props: Props) => {
                             />
                             <Button variant="outline-success">Search</Button>
                         </Form>
-                        <Form className="d-flex">
+                        <Form className="d-flex ms-4">
                             <Button variant="outline-primary">
                                 <i className="fa-solid fa-user"></i>
                             </Button>

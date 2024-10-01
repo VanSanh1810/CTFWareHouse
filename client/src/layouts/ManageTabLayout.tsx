@@ -12,7 +12,9 @@ const ManageTabLayout = (props: Props) => {
         <Container>
             <div className="d-flex flex-direction-row align-items-center" style={{ justifyContent: 'space-between' }}>
                 <h2>{props.title}</h2>
-                <Button variant="success">+ New {props.title}</Button>
+                <Button variant="success" onClick={props.createNewFunc}>
+                    + New {props.title}
+                </Button>
             </div>
             <div>{props.children}</div>
         </Container>
