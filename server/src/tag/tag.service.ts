@@ -77,11 +77,9 @@ export class TagService {
   async remove(id: string) {
     try {
       const currentTag = await this.tagRepository.findOneByOrFail({ id: id });
-
-      if (currentTag.challenges.length > 0) {
-      }
       return await this.tagRepository.delete(currentTag);
     } catch (e) {
+      console.log(e);
       if (e instanceof EntityNotFoundError) {
         throw new HttpException(
           'Category resource not found',

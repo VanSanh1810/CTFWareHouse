@@ -47,14 +47,17 @@ export class CategoryService {
 
   async remove(id: string) {
     try {
-      const selectedCate = await this.cateRepository.findOneByOrFail({
-        id: id,
+      const selectedCate = await this.cateRepository.findOneOrFail({
+        where: {
+          id: id,
+        },
+        relations: ['tags', 'challenges'],
       });
       if (
         selectedCate.challenges?.length > 0 ||
         selectedCate.tags?.length > 0
       ) {
-        return new HttpException(
+        throw new HttpException(
           'Category still have related data',
           HttpStatus.CONFLICT,
         );
@@ -63,6 +66,9 @@ export class CategoryService {
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+      }
+      if (e instanceof HttpException) {
+        throw e;
       }
       throw new HttpException(
         `Internal Server Error ${e}`,
