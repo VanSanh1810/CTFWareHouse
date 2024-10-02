@@ -17,9 +17,11 @@ export class TagService {
 
   async create(createTagDto: CreateTagDto) {
     try {
-      const cate = await this.cateRepository.findOneByOrFail({
-        id: createTagDto.category,
-      });
+      const cate = createTagDto.category
+        ? await this.cateRepository.findOneByOrFail({
+            id: createTagDto.category,
+          })
+        : null;
       const newTag = this.tagRepository.create({
         ...createTagDto,
         category: cate,
@@ -53,10 +55,12 @@ export class TagService {
       if (updateTagDto.tagName) {
         currentTag.tagName = updateTagDto.tagName;
       }
-      if (updateTagDto.category) {
-        currentTag.category = await this.cateRepository.findOneByOrFail({
-          id: updateTagDto.category,
-        });
+      if (updateTagDto.category || updateTagDto.category === null) {
+        currentTag.category = updateTagDto.category
+          ? await this.cateRepository.findOneByOrFail({
+              id: updateTagDto.category,
+            })
+          : null;
       }
 
       return await this.tagRepository.save(currentTag);

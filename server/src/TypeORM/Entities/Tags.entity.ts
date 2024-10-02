@@ -11,6 +11,6 @@ export class Tag extends AbstractEntity<Tag> {
   @ManyToMany(() => Challenge, (chall) => chall.tags)
   challenges: Challenge[];
 
-  @ManyToOne(() => Category, (cate) => cate.tags)
-  category: Category;
+  @ManyToOne(() => Category, (cate) => cate.tags, { nullable: true })
+  category: Category | null;
 }

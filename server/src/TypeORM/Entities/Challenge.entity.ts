@@ -26,7 +26,9 @@ export class Challenge extends AbstractEntity<Challenge> {
   @Column({ nullable: true })
   staticFileName: string;
 
-  @ManyToMany(() => Tag, (tag) => tag.challenges)
+  @ManyToMany(() => Tag, (tag) => tag.challenges, {
+    cascade: ['insert', 'update'],
+  })
   @JoinTable()
   tags: Tag[];
 }
