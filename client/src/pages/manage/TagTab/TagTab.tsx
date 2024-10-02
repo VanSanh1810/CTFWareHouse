@@ -45,9 +45,9 @@ const TagTab = () => {
 
         // alert(tagNameInput.value + _category.value);
 
-        if (tagNameInput && tagNameInput.value.trim() && _category.value) {
+        if (tagNameInput && tagNameInput.value.trim()) {
             try {
-                const createTagDto: CreateTagDto = { tagName: tagNameInput.value.trim(), category: _category.value };
+                const createTagDto: CreateTagDto = { tagName: tagNameInput.value.trim(), category: _category.value || null };
                 await axiosInstance.post('/tag', createTagDto);
                 toast.success('Tag created !', {
                     position: 'top-right',
@@ -111,9 +111,9 @@ const TagTab = () => {
         const tagNameInput = form.querySelector('input[name="tagName"]') as HTMLInputElement;
         const _category = form.querySelector('select[name="category"]') as HTMLInputElement;
 
-        if (tagNameInput && tagNameInput.value.trim() && _category.value) {
+        if (tagNameInput && tagNameInput.value.trim()) {
             try {
-                const createTagDto: CreateTagDto = { tagName: tagNameInput.value.trim(), category: _category.value };
+                const createTagDto: CreateTagDto = { tagName: tagNameInput.value.trim(), category: _category.value || null };
                 await axiosInstance.patch(`/tag/${modalEdit?.id}`, createTagDto);
                 toast.success('Tag updated !', {
                     position: 'top-right',
@@ -296,7 +296,7 @@ const TagTab = () => {
                                                 <tr className="align-middle" key={rowIndex}>
                                                     <td>{tag.id}</td>
                                                     <td>{tag.tagName}</td>
-                                                    <td>{tag.category.cateName}</td>
+                                                    <td>{tag.category?.cateName || 'No category'}</td>
                                                     <td className="text-end">
                                                         <div className="drodown">
                                                             <Button
@@ -306,7 +306,7 @@ const TagTab = () => {
                                                                     setModalEdit({
                                                                         id: tag.id,
                                                                         tagName: tag.tagName,
-                                                                        category: tag.category.id,
+                                                                        category: tag.category?.id || '',
                                                                     })
                                                                 }
                                                             >
@@ -350,7 +350,7 @@ const TagTab = () => {
                         <Form.Group className="mb-3" controlId="cateName">
                             <Form.Label>Category</Form.Label>
                             <Form.Select aria-label="Default select example" className="mb-3" name="category">
-                                <option value={''}>Open this select menu</option>
+                                <option value={''}>No category</option>
                                 {listCate.map((cate, i) => {
                                     return (
                                         <option key={`select-${i}`} value={cate.id}>
@@ -401,7 +401,7 @@ const TagTab = () => {
                                 name="category"
                                 defaultValue={modalEdit?.category}
                             >
-                                <option value={''}>Open this select menu</option>
+                                <option value={''}>No category</option>
                                 {listCate.map((cate, i) => {
                                     return (
                                         <option key={`select-${i}`} value={cate.id}>

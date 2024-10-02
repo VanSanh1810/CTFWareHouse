@@ -9,10 +9,14 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <AppProvider>
-            <RouterProvider router={router} />
-            <ToastContainer newestOnTop={true} />
-        </AppProvider>
-    </StrictMode>,
+    // <StrictMode>
+    //     <AppProvider>
+    //         <RouterProvider router={router} />
+    //         <ToastContainer newestOnTop={true} />
+    //     </AppProvider>
+    // </StrictMode>,
+    <AppProvider>
+        <RouterProvider router={router} />
+        <ToastContainer newestOnTop={true} />
+    </AppProvider>,
 );
