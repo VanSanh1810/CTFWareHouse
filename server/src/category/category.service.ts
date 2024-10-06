@@ -62,7 +62,7 @@ export class CategoryService {
           HttpStatus.CONFLICT,
         );
       }
-      return await this.cateRepository.delete(selectedCate);
+      return await this.cateRepository.remove(selectedCate);
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         throw new HttpException('Category not found', HttpStatus.NOT_FOUND);

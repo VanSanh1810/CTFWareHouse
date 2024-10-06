@@ -81,7 +81,13 @@ export class TagService {
   async remove(id: string) {
     try {
       const currentTag = await this.tagRepository.findOneByOrFail({ id: id });
-      return await this.tagRepository.delete(currentTag);
+      if (currentTag.challenges && currentTag.challenges.length > 0) {
+        throw new HttpException(
+          'Tag still have some challenges with it !',
+          HttpStatus.CONFLICT,
+        );
+      }
+      return await this.tagRepository.remove(currentTag);
     } catch (e) {
       console.log(e);
       if (e instanceof EntityNotFoundError) {

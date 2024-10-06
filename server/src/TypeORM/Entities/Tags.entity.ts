@@ -5,7 +5,7 @@ import { Category } from './Category.entity';
 
 @Entity()
 export class Tag extends AbstractEntity<Tag> {
-  @Column({ unique: true })
+  @Column()
   tagName: string;
 
   @ManyToMany(() => Challenge, (chall) => chall.tags)

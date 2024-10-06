@@ -10,6 +10,7 @@ import {
   UploadedFile,
   HttpException,
   HttpStatus,
+  UsePipes,
 } from '@nestjs/common';
 import { ChallService } from './chall.service';
 import { CreateChallDto } from './dto/create-chall.dto';
@@ -17,6 +18,7 @@ import { UpdateChallDto } from './dto/update-chall.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { ValidateTagsPipe } from './pipe/ValidateTags.pipe';
 
 @Controller('chall')
 export class ChallController {
@@ -58,6 +60,7 @@ export class ChallController {
       }),
     }),
   )
+  @UsePipes(new ValidateTagsPipe())
   async create(
     @Body() createChallDto: CreateChallDto,
     @UploadedFile() file: Express.Multer.File,

@@ -1,4 +1,10 @@
-import { ArrayMinSize, IsArray, IsNotEmpty } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsNotEmpty,
+  ValidateNested,
+} from 'class-validator';
 
 export class CreateChallDto {
   @IsNotEmpty()
@@ -18,5 +24,13 @@ export class CreateChallDto {
 
   @IsArray()
   @ArrayMinSize(1)
-  tags: string[];
+  @ValidateNested({ each: true }) // Sẽ chỉ validate khi phần tử là object
+  @Type(() => Object)
+  tags: (string | NewTagFrag)[];
+}
+
+class NewTagFrag {
+  @IsNotEmpty()
+  tagName: string;
+  category?: string;
 }

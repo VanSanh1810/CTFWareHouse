@@ -27,10 +27,20 @@ export class ChallService {
 
       const tags = [
         ...(await Promise.all(
-          createChallDto.tags.map(
-            async (tag) =>
-              await this.tagRepository.findOneByOrFail({ id: tag }),
-          ),
+          createChallDto.tags.map(async (tag) => {
+            if (typeof tag === 'object') {
+              return await this.tagRepository.create({
+                tagName: tag.tagName,
+                category: tag.category
+                  ? await this.cateRepository.findOneByOrFail({
+                      id: tag.category,
+                    })
+                  : null,
+              });
+            } else {
+              return await this.tagRepository.findOneByOrFail({ id: tag });
+            }
+          }),
         )),
       ];
 
@@ -105,9 +115,9 @@ export class ChallService {
         id: id,
       });
 
-      const tags = [
+      const removeTags = [
         ...(await Promise.all(
-          updateChallTagDto.tags.map(async (tag) => {
+          updateChallTagDto.removetags.map(async (tag) => {
             const _tags = await this.tagRepository.findOneByOrFail({ id: tag });
             if (_tags.category.id !== currentChall.category.id) {
               // Tags dont exist in category
@@ -121,7 +131,42 @@ export class ChallService {
         )),
       ];
 
-      currentChall.tags = tags;
+      if (
+        currentChall.tags &&
+        currentChall.tags.length > 0 &&
+        removeTags.length > 0
+      ) {
+        removeTags.map((tTag) => {
+          for (let i = 0; i < currentChall.tags.length; i++) {
+            if (currentChall.tags[i].id === tTag.id) {
+              currentChall.tags.splice(i, 1); // Xóa 1 phần tử tại vị trí i
+            }
+          }
+        });
+      }
+
+      const newTags = [
+        ...(await Promise.all(
+          updateChallTagDto.newtags.map(async (tag) => {
+            if (typeof tag === 'object') {
+              return await this.tagRepository.create({
+                tagName: tag.tagName,
+                category: tag.category
+                  ? await this.cateRepository.findOneByOrFail({
+                      id: tag.category,
+                    })
+                  : null,
+              });
+            } else {
+              return await this.tagRepository.findOneByOrFail({ id: tag });
+            }
+          }),
+        )),
+      ];
+
+      if (newTags && newTags.length > 0) {
+        currentChall.tags.concat(newTags);
+      }
 
       return await this.challRepository.save(currentChall);
     } catch (e) {
@@ -144,7 +189,7 @@ export class ChallService {
         id: id,
       });
 
-      return await this.challRepository.softRemove({ id: currentChall.id });
+      return await this.challRepository.softRemove(currentChall);
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         throw new HttpException(
