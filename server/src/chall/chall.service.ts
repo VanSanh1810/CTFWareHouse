@@ -9,6 +9,7 @@ import { Category } from 'src/TypeORM/Entities/Category.entity';
 import { ConfigService } from '@nestjs/config';
 import { extname } from 'path';
 import { UpdateChallTagDto } from './dto/update-chall-tag.dto';
+import { FindChallQueryDto } from './dto/find-chall-query.dto';
 
 @Injectable()
 export class ChallService {
@@ -70,8 +71,26 @@ export class ChallService {
     }
   }
 
-  async findAll() {
-    return await this.challRepository.find();
+  async findAll(query: FindChallQueryDto) {
+    const queryBuilder = this.challRepository
+      .createQueryBuilder('challenge')
+      .leftJoinAndSelect('challenge.tags', 'tag')
+      .limit(16)
+      .offset((query.page - 1) * 16);
+
+    if (query.category !== undefined && query.category !== null) {
+      const queryCate = await this.cateRepository.findOneByOrFail({
+        id: query.category,
+      });
+      queryBuilder.andWhere('student.category = :queryCate', { queryCate });
+    }
+
+    if (query.tags && query.tags.length > 0) {
+      const tagIds = [...query.tags];
+      queryBuilder.andWhere('tag.id IN (:...tagIds)', { tagIds });
+    }
+
+    return await queryBuilder.getMany();
   }
 
   async findOne(id: string) {

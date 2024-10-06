@@ -11,6 +11,7 @@ import {
   HttpException,
   HttpStatus,
   UsePipes,
+  Query,
 } from '@nestjs/common';
 import { ChallService } from './chall.service';
 import { CreateChallDto } from './dto/create-chall.dto';
@@ -19,6 +20,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { ValidateTagsPipe } from './pipe/ValidateTags.pipe';
+import { FindChallQueryDto } from './dto/find-chall-query.dto';
 
 @Controller('chall')
 export class ChallController {
@@ -69,8 +71,8 @@ export class ChallController {
   }
 
   @Get()
-  async findAll() {
-    return await this.challService.findAll();
+  async findAll(@Query() query: FindChallQueryDto) {
+    return await this.challService.findAll(query);
   }
 
   @Get(':id')
