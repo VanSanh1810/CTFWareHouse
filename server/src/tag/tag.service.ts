@@ -6,6 +6,7 @@ import { Tag } from 'src/TypeORM/Entities/Tags.entity';
 import { EntityNotFoundError, Repository } from 'typeorm';
 import { Challenge } from 'src/TypeORM/Entities/Challenge.entity';
 import { Category } from 'src/TypeORM/Entities/Category.entity';
+import { FindTagQueryDto } from './dto/find-tag-query.dto';
 
 @Injectable()
 export class TagService {
@@ -41,8 +42,15 @@ export class TagService {
     }
   }
 
-  async findAll() {
-    return await this.tagRepository.find({ relations: ['category'] });
+  async findAll(query: FindTagQueryDto) {
+    const where: any = {};
+    if (query.category !== null && query.category !== undefined) {
+      where.category = await this.cateRepository.findOneByOrFail({
+        id: query.category,
+      });
+    }
+
+    return await this.tagRepository.find({ relations: ['category'], where });
   }
 
   async findOne(id: string) {
