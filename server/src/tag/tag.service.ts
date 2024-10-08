@@ -4,7 +4,6 @@ import { UpdateTagDto } from './dto/update-tag.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Tag } from 'src/TypeORM/Entities/Tags.entity';
 import { EntityNotFoundError, Repository } from 'typeorm';
-import { Challenge } from 'src/TypeORM/Entities/Challenge.entity';
 import { Category } from 'src/TypeORM/Entities/Category.entity';
 import { FindTagQueryDto } from './dto/find-tag-query.dto';
 
@@ -12,7 +11,6 @@ import { FindTagQueryDto } from './dto/find-tag-query.dto';
 export class TagService {
   constructor(
     @InjectRepository(Tag) private tagRepository: Repository<Tag>,
-    // @InjectRepository(Challenge) private challRepository: Repository<Challenge>,
     @InjectRepository(Category) private cateRepository: Repository<Category>,
   ) {}
 
@@ -88,7 +86,10 @@ export class TagService {
 
   async remove(id: string) {
     try {
-      const currentTag = await this.tagRepository.findOneByOrFail({ id: id });
+      const currentTag = await this.tagRepository.findOne({
+        relations: ['challenge'],
+        where: { id: id },
+      });
       if (currentTag.challenges && currentTag.challenges.length > 0) {
         throw new HttpException(
           'Tag still have some challenges with it !',

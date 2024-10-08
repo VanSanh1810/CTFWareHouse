@@ -21,6 +21,8 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { ValidateTagsPipe } from './pipe/ValidateTags.pipe';
 import { FindChallQueryDto } from './dto/find-chall-query.dto';
+import { UpdateChallTagDto } from './dto/update-chall-tag.dto';
+import { ValidateTagsUpdatePipe } from './pipe/ValidateTags_Update.pipe';
 
 @Controller('chall')
 export class ChallController {
@@ -86,6 +88,15 @@ export class ChallController {
     @Body() updateChallDto: UpdateChallDto,
   ) {
     return await this.challService.update(id, updateChallDto);
+  }
+
+  @Patch('tag/:id')
+  @UsePipes(new ValidateTagsUpdatePipe())
+  async updateForTag(
+    @Param('id') id: string,
+    @Body() updateChallTagDto: UpdateChallTagDto,
+  ) {
+    return await this.challService.updateForTags(id, updateChallTagDto);
   }
 
   @Delete(':id')

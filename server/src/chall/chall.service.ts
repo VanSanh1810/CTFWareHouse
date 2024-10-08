@@ -75,6 +75,7 @@ export class ChallService {
     const queryBuilder = this.challRepository
       .createQueryBuilder('challenge')
       .leftJoinAndSelect('challenge.tags', 'tag')
+      .leftJoinAndSelect('challenge.category', 'category')
       .limit(16)
       .offset((query.page - 1) * 16);
 
@@ -82,7 +83,9 @@ export class ChallService {
       const queryCate = await this.cateRepository.findOneByOrFail({
         id: query.category,
       });
-      queryBuilder.andWhere('student.category = :queryCate', { queryCate });
+      queryBuilder.andWhere('challenge.category.id = :queryCate', {
+        queryCate: queryCate.id,
+      });
     }
 
     if (query.tags && query.tags.length > 0) {
