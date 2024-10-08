@@ -41,14 +41,24 @@ export class TagService {
   }
 
   async findAll(query: FindTagQueryDto) {
-    const where: any = {};
-    if (query.category !== null && query.category !== undefined) {
-      where.category = await this.cateRepository.findOneByOrFail({
+    const queryBuilder = this.tagRepository
+      .createQueryBuilder('tag')
+      .leftJoinAndSelect('tag.category', 'category')
+      .limit(16)
+      .offset(((query.page ? query.page : 1) - 1) * 16);
+
+    if (query.category !== undefined && query.category !== null) {
+      const queryCate = await this.cateRepository.findOneBy({
         id: query.category,
       });
+      if (queryCate) {
+        queryBuilder.andWhere('tag.category.id = :queryCate', {
+          queryCate: queryCate.id,
+        });
+      }
     }
 
-    return await this.tagRepository.find({ relations: ['category'], where });
+    return await queryBuilder.getMany();
   }
 
   async findOne(id: string) {
