@@ -22,13 +22,14 @@ export class ChallService {
 
   async create(createChallDto: CreateChallDto, file: Express.Multer.File) {
     try {
-      const cate = await this.cateRepository.findOneByOrFail({
+      console.log(createChallDto);
+      const cate = await this.cateRepository.findOneBy({
         id: createChallDto.category,
       });
 
       const tags = [
         ...(await Promise.all(
-          createChallDto.tags.map(async (tag) => {
+          JSON.parse(createChallDto.tags).map(async (tag) => {
             if (typeof tag === 'object') {
               return await this.tagRepository.create({
                 tagName: tag.tagName,
@@ -60,7 +61,7 @@ export class ChallService {
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         throw new HttpException(
-          'Reference resource not found',
+          `Reference resource not found ${e}`,
           HttpStatus.NOT_FOUND,
         );
       }
@@ -77,7 +78,7 @@ export class ChallService {
       .leftJoinAndSelect('challenge.tags', 'tag')
       .leftJoinAndSelect('challenge.category', 'category')
       .limit(16)
-      .offset(((query.page ? query.page : 1) - 1) * 16);
+      .skip(((query.page ? query.page : 1) - 1) * 16);
 
     if (query.category !== undefined && query.category !== null) {
       const queryCate = await this.cateRepository.findOneByOrFail({
@@ -94,8 +95,10 @@ export class ChallService {
       const tagIds = [...query.tags];
       queryBuilder.andWhere('tag.id IN (:...tagIds)', { tagIds });
     }
-
-    return await queryBuilder.getMany();
+    return {
+      challenges: [...(await queryBuilder.getMany())],
+      totalPage: Math.ceil((await queryBuilder.getCount()) / 16),
+    };
   }
 
   async findOne(id: string) {
@@ -143,13 +146,6 @@ export class ChallService {
         ...(await Promise.all(
           updateChallTagDto.removetags.map(async (tag) => {
             const _tags = await this.tagRepository.findOneByOrFail({ id: tag });
-            if (_tags.category.id !== currentChall.category.id) {
-              // Tags dont exist in category
-              throw new HttpException(
-                'Reference resource not found',
-                HttpStatus.NOT_FOUND,
-              );
-            }
             return _tags;
           }),
         )),

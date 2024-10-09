@@ -58,7 +58,16 @@ export class TagService {
       }
     }
 
-    return await queryBuilder.getMany();
+    if (query.name) {
+      queryBuilder.andWhere('tag.tagName LIKE :name', {
+        name: `%${query.name}%`,
+      }); // tìm kiếm với LIKE
+    }
+
+    return {
+      tags: [...(await queryBuilder.getMany())],
+      totalPage: Math.ceil((await queryBuilder.getCount()) / 16),
+    };
   }
 
   async findOne(id: string) {

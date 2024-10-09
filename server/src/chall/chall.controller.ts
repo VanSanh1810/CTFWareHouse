@@ -34,7 +34,7 @@ export class ChallController {
     FileInterceptor('file', {
       // Check the mimetypes to allow for upload
       fileFilter: (req: any, file: any, cb: any) => {
-        if (file.mimetype.match(/\/(rar|tar|bz|bz2|gz|zip|7z)$/)) {
+        if (file.mimetype.match(/(rar|tar|bz|bz2|gz|zip|7z)/)) {
           // Allow storage of file
           cb(null, true);
         } else {
@@ -65,7 +65,7 @@ export class ChallController {
       }),
     }),
   )
-  @UsePipes(new ValidateTagsPipe())
+  // @UsePipes(new ValidateTagsPipe(), new ValidationPipe())
   async create(
     @Body() createChallDto: CreateChallDto,
     @UploadedFile() file: Express.Multer.File,

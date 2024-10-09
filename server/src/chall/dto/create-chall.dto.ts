@@ -28,11 +28,9 @@ export class CreateChallDto {
   @IsString()
   sourceUrl: string;
 
-  @IsArray()
-  @ArrayMinSize(0)
-  @ValidateNested({ each: true }) // Sẽ chỉ validate khi phần tử là object
-  @Type(() => Object)
-  tags: (string | NewTagFrag)[];
+  @IsNotEmpty()
+  @IsString()
+  tags: string;
 }
 
 class NewTagFrag {

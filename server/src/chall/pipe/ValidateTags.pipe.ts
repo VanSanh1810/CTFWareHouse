@@ -1,15 +1,14 @@
-import {
-  Injectable,
-  PipeTransform,
-  ArgumentMetadata,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, PipeTransform, BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class ValidateTagsPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata) {
+  transform(value: any) {
+    console.log(value);
     if (!Array.isArray(value.tags)) {
-      throw new BadRequestException('Tags must be an array');
+      value.tags = JSON.parse(value.tags);
+      if (!Array.isArray(value.tags)) {
+        throw new BadRequestException('Tags must be an array');
+      }
     }
 
     value.tags.forEach((tag) => {
