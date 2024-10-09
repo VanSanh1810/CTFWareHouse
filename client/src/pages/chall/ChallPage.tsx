@@ -6,6 +6,8 @@ import { ChallCard } from '../../components/ChallCard';
 import { AppContext, AppContextType } from '../../contexts/app/AppContext';
 import { Link, useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../services/Axios';
+import { Bounce, toast } from 'react-toastify';
+import { CategoryDto } from '../../types/Dtos/category.dto';
 
 const ChallPage = () => {
     return (
@@ -30,7 +32,30 @@ const SearchFillter = (props: SearchFillterProps) => {
     // useSearchParams hook
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const [selectedCate, setSelectedCate] = useState();
+    const [selectedCate, setSelectedCate] = useState<string>('');
+    const [listCate, setListCate] = useState<CategoryDto[]>([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axiosInstance.get('/category');
+                setListCate([...response.data]);
+            } catch (e) {
+                toast.error(`${e}`, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+            }
+        };
+        fetchCategories();
+    }, []);
 
     // Lấy giá trị của tham số 'paramName'
 
@@ -64,33 +89,32 @@ const SearchFillter = (props: SearchFillterProps) => {
                 <ListGroup style={{ zIndex: -10 }}>
                     <ListGroup.Item
                         action
-                        onClick={(e) => {
-                            searchParams.set('bookmark', e.currentTarget.checked ? '1' : '0');
+                        onClick={() => {
+                            searchParams.set('category', '');
                             setSearchParams(searchParams);
+                            setSelectedCate('');
                         }}
-                        active
+                        active={!selectedCate}
                     >
                         All Category
                     </ListGroup.Item>
-                    <ListGroup.Item action onClick={() => {}}>
-                        Web Exploitation
-                    </ListGroup.Item>
-                    <ListGroup.Item action onClick={() => {}}>
-                        Cryptography
-                    </ListGroup.Item>
-                    <ListGroup.Item action onClick={() => {}}>
-                        Reverse Engineering
-                    </ListGroup.Item>
-                    <ListGroup.Item action onClick={() => {}}>
-                        Forensics
-                    </ListGroup.Item>
+                    {listCate.map((cate, index) => {
+                        return (
+                            <ListGroup.Item
+                                key={`cate-${index}`}
+                                action
+                                onClick={() => {
+                                    searchParams.set('category', cate.id);
+                                    setSearchParams(searchParams);
+                                    setSelectedCate(cate.id);
+                                }}
+                                active={selectedCate === cate.id}
+                            >
+                                {cate.cateName}
+                            </ListGroup.Item>
+                        );
+                    })}
                 </ListGroup>
-                {/* <h4 className="mt-4" style={{ userSelect: 'none' }}>
-                    Sub catagory
-                </h4> */}
-                {/* <div style={{ border: '1px solid black', paddingLeft: '1rem' }}>
-                    <Form.Check type="radio" id="custom-switch" label="Check this switch" />
-                </div> */}
             </CardBox>
         </>
     );
@@ -104,19 +128,25 @@ const ChallList = () => {
     const queryHideSolve = searchParams.get('hidesolve');
     const queryBookmark = searchParams.get('bookmark');
 
+    const [reloadAction, setReloadAction] = useState<boolean>(false);
+
     const [challList, setChallList] = React.useState([]);
 
     useEffect(() => {
         alert([queryPage, queryCategory, queryHideSolve, queryBookmark]);
-    }, [queryPage, queryCategory, queryHideSolve, queryBookmark]);
+    }, [reloadAction, queryPage, queryCategory, queryHideSolve, queryBookmark]);
 
     const changePage = (value: number) => {
-        const newPageNum = queryPage + value;
+        const newPageNum = value;
         console.log(newPageNum);
         if (newPageNum > 0) {
             searchParams.set('page', newPageNum.toString());
             setSearchParams(searchParams);
+        } else {
+            searchParams.set('page', '1');
+            setSearchParams(searchParams);
         }
+        setReloadAction((r) => !r);
     };
 
     return (

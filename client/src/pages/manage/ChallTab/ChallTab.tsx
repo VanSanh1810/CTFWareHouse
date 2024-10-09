@@ -1,9 +1,10 @@
-import React, { FormEventHandler, useEffect } from 'react';
+import React, { FormEventHandler, useEffect, useState } from 'react';
 import ManageTabLayout from '../../../layouts/ManageTabLayout';
 import axiosInstance from '../../../services/Axios';
 import { Bounce, toast } from 'react-toastify';
-import { Button, Form, InputGroup, Modal } from 'react-bootstrap';
+import { Badge, Button, Card, Container, Form, InputGroup, Modal } from 'react-bootstrap';
 import { AxiosError } from 'axios';
+import { debounce } from 'lodash';
 
 const ChallTab = () => {
     const [listChall, setListChall] = React.useState([]);
@@ -60,7 +61,16 @@ const ChallTab = () => {
 
                 formData.append('challName', challNameInput.value);
                 formData.append('category', _category.value.trim());
-                // formData.append('tags', );
+                const tagToSend = [
+                    ...tagsForCreate.map((tag) => {
+                        if (tag.id) {
+                            return tag.id;
+                        } else {
+                            return { tagName: tag.tagName, category: tag.category };
+                        }
+                    }),
+                ];
+                formData.append('tags', JSON.stringify(tagToSend));
                 if (descInput.value.trim()) {
                     formData.append('description', descInput.value.trim());
                 }
@@ -68,7 +78,7 @@ const ChallTab = () => {
                 formData.append('sourceUrl', urlInput.value.trim());
                 formData.append('file', challFileInput.files[0]); //
 
-                await axiosInstance.post('/category', formData, {
+                await axiosInstance.post('/chall', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -87,6 +97,7 @@ const ChallTab = () => {
                 setReloadAction((r) => !r);
                 setCreateModal(false);
             } catch (e) {
+                console.log(e);
                 if (e instanceof AxiosError) {
                     toast.error(`${e.response?.data.message}`, {
                         position: 'top-right',
@@ -127,6 +138,17 @@ const ChallTab = () => {
             });
         }
     };
+    /////
+    ///
+    interface CreateTagsListDto {
+        id?: string;
+        tagName: string;
+        category?: string;
+    }
+
+    const [createTagModal, setCreateTagModal] = React.useState<boolean>(false);
+    const [tagsForCreate, setTagsForCreate] = useState<CreateTagsListDto[]>([]);
+    const [tagNameForFind, setTagNameForFind] = useState<string>('');
 
     ///////
     useEffect(() => {
@@ -153,31 +175,33 @@ const ChallTab = () => {
 
     useEffect(() => {
         const fetchTags = async () => {
-            try {
-                const response = await axiosInstance.get('/tag');
-                setTagList([...response.data]);
-            } catch (e) {
-                toast.error(`${e}`, {
-                    position: 'top-right',
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: 'light',
-                    transition: Bounce,
-                });
+            if (createTagModal && tagNameForFind) {
+                try {
+                    const response = await axiosInstance.get(`/tag?name=${tagNameForFind}`);
+                    setTagList([...response.data.tags]);
+                } catch (e) {
+                    toast.error(`${e}`, {
+                        position: 'top-right',
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: 'light',
+                        transition: Bounce,
+                    });
+                }
             }
         };
         fetchTags();
-    }, [reloadAction]);
+    }, [reloadAction, createTagModal, tagNameForFind]);
 
     useEffect(() => {
         const fetchChalls = async () => {
             try {
                 const response = await axiosInstance.get('/chall');
-                setListChall([...response.data]);
+                setListChall([...response.data.challenges]);
             } catch (e) {
                 toast.error(`${e}`, {
                     position: 'top-right',
@@ -194,6 +218,112 @@ const ChallTab = () => {
         };
         fetchChalls();
     }, [reloadAction]);
+
+    const addTagToCreate = async (item: CreateTagsListDto) => {
+        if (item.id) {
+            // exist one
+            if (item.tagName) {
+                setTagsForCreate((ls) => {
+                    let flag = false;
+                    ls.forEach((tag) => {
+                        if (tag.tagName === item.tagName && tag.id === item.id) {
+                            flag = true;
+                            return;
+                        }
+                    });
+                    if (flag) {
+                        return ls;
+                    }
+                    return [...ls, item];
+                });
+            } else {
+                toast.error('Unexpecting error', {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+            }
+        } else {
+            // new
+            if (item.tagName && item.category) {
+                setTagsForCreate((ls) => {
+                    let flag = false;
+                    ls.forEach((tag) => {
+                        if (tag.tagName === item.tagName && tag.category === item.category) {
+                            flag = true;
+                            return;
+                        }
+                    });
+                    if (flag) {
+                        return ls;
+                    }
+                    return [...ls, item];
+                });
+            } else {
+                toast.error('Unexpecting error', {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+            }
+        }
+    };
+
+    const removeSelectedTagHandler = async (item: CreateTagsListDto) => {
+        if (item.id) {
+            // exist one
+            if (item.tagName) {
+                setTagsForCreate((ls) => {
+                    const newLs = ls.filter((tag) => tag.tagName !== item.tagName || tag.id !== item.id);
+                    return newLs;
+                });
+            } else {
+                toast.error('Unexpecting error', {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+            }
+        } else {
+            // new
+            if (item.tagName && item.category) {
+                setTagsForCreate((ls) => {
+                    const newLs = ls.filter((tag) => tag.tagName !== item.tagName || tag.category !== item.category);
+                    return newLs;
+                });
+            } else {
+                toast.error('Unexpecting error', {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+            }
+        }
+    };
 
     return (
         <ManageTabLayout title="Chall" createNewFunc={() => setCreateModal(true)}>
@@ -277,6 +407,27 @@ const ChallTab = () => {
                                 })}
                             </Form.Select>
                         </Form.Group>
+                        <Form.Group className="mb-3" controlId="cateName">
+                            <Form.Label>Tags</Form.Label>
+                            <div className="me-2">
+                                {tagsForCreate.map((tag, i) => {
+                                    return (
+                                        <Badge
+                                            className="me-1"
+                                            key={`badge-${i}`}
+                                            bg={tag.id ? 'success' : 'info'}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            {tag.tagName}
+                                            <i className="fa-solid fa-x ms-2" onClick={() => removeSelectedTagHandler(tag)}></i>
+                                        </Badge>
+                                    );
+                                })}
+                            </div>
+                            <Card className="mt-2">
+                                <Button onClick={() => setCreateTagModal(true)}>Selecte tags</Button>
+                            </Card>
+                        </Form.Group>
                         <Form.Group className="mb-3" controlId="desc">
                             <Form.Label>Description (optional)</Form.Label>
                             <Form.Control
@@ -313,6 +464,152 @@ const ChallTab = () => {
                     <Button variant="secondary" onClick={() => setCreateModal(false)}>
                         Close
                     </Button>
+                </Modal.Footer>
+            </Modal>
+            {/* Tags modified create modal */}
+            <Modal
+                show={createTagModal}
+                onHide={() => {
+                    setTagNameForFind('');
+                    setCreateTagModal(false);
+                }}
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>Select tags</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div>
+                        {tagsForCreate.map((tag, i) => {
+                            return (
+                                <Badge
+                                    className="me-1"
+                                    key={`mTag-${i}`}
+                                    bg={tag.id ? 'success' : 'info'}
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => removeSelectedTagHandler(tag)}
+                                >
+                                    {tag.tagName}
+                                    <i className="fa-solid fa-x ms-2" onClick={() => removeSelectedTagHandler(tag)}></i>
+                                </Badge>
+                            );
+                        })}
+                        {!tagsForCreate || tagsForCreate.length < 1 ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                <h3 className="mt-3" style={{ color: '#DEDEDE' }}>
+                                    No tag
+                                </h3>
+                            </div>
+                        ) : null}
+                    </div>
+                    <br style={{ border: 'solid' }} />
+                    <h5>Select existed tag</h5>
+                    <Container fluid>
+                        <Form>
+                            <Form.Group className="mb-3" controlId="formGroupEmail">
+                                <Form.Label>Tag name</Form.Label>
+                                <Form.Control
+                                    autoCorrect="none"
+                                    type="text"
+                                    placeholder="Enter tag name"
+                                    onChange={debounce((e) => {
+                                        setTagNameForFind(e.target.value);
+                                    }, 500)}
+                                />
+                                {tagNameForFind ? (
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            width: '89%',
+                                            padding: '10px',
+                                            maxHeight: '50vh',
+                                            overflowY: 'scroll',
+                                            backgroundColor: 'white',
+                                            boxShadow: '-2px 16px 54px -14px rgba(0,0,0,0.29)',
+                                        }}
+                                    >
+                                        {tagList.map((tag, i) => {
+                                            return (
+                                                <div
+                                                    key={`tagforselect-${i}`}
+                                                    style={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        cursor: 'pointer',
+                                                        backgroundColor: 'white',
+                                                        padding: '0.5rem',
+                                                        borderRadius: '0.2rem',
+                                                    }}
+                                                    onClick={() => addTagToCreate({ id: tag.id, tagName: tag.tagName })}
+                                                >
+                                                    <span>{tag.tagName}</span>
+                                                    <span>Category: {tag.category.cateName}</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : null}
+                            </Form.Group>
+                            <Button type="submit" className="mt-2">
+                                Add
+                            </Button>
+                        </Form>
+                    </Container>
+                    <br style={{ border: 'solid' }} />
+                    <h5>Or create new tag</h5>
+                    <Container fluid>
+                        <Form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                // alert(e.target.c_tag_name.value);
+                                alert(e.target.c_tag_cate.value);
+                                if (e.target.c_tag_cate.value?.trim() && e.target.c_tag_name.value?.trim()) {
+                                    addTagToCreate({
+                                        tagName: e.target.c_tag_name.value.trim(),
+                                        category: e.target.c_tag_cate.value.trim(),
+                                    });
+                                }
+                            }}
+                        >
+                            <Form.Group className="mb-3" controlId="formGroupTagName">
+                                <Form.Label>Tag name</Form.Label>
+                                <Form.Control type="text" placeholder="Enter tag name" name="c_tag_name" />
+                            </Form.Group>
+                            <Form.Select aria-label="Default select example" name="c_tag_cate">
+                                <option value={''}>No Category</option>
+                                {listCate.map((cate, i) => {
+                                    return (
+                                        <option key={`select-cate-tag-${i}`} value={cate.id}>
+                                            {cate.cateName}
+                                        </option>
+                                    );
+                                })}
+                            </Form.Select>
+                            <Button type="submit" className="mt-2">
+                                Create
+                            </Button>
+                        </Form>
+                    </Container>
+                </Modal.Body>
+                <Modal.Footer>
+                    {/* <Button
+                        variant="secondary"
+                        onClick={() => () => {
+                            setTagNameForFind('');
+                            setCreateTagModal(false);
+                        }}
+                    >
+                        Close
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => () => {
+                            setTagNameForFind('');
+                            setCreateTagModal(false);
+                        }}
+                    >
+                        Save Changes
+                    </Button> */}
                 </Modal.Footer>
             </Modal>
         </ManageTabLayout>

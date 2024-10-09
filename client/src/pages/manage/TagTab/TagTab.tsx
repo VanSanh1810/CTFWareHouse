@@ -1,10 +1,12 @@
-import React, { FormEventHandler, useEffect } from 'react';
+import React, { FormEventHandler, useEffect, useState } from 'react';
 import { CreateTagDto } from '../../../types/Dtos/create-tag.dto';
 import axiosInstance from '../../../services/Axios';
 import { Bounce, toast } from 'react-toastify';
 import ManageTabLayout from '../../../layouts/ManageTabLayout';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { AxiosError } from 'axios';
+import { Pagination } from '../../../components/Pagination';
+import { useSearchParams } from 'react-router-dom';
 
 const TagTab = () => {
     interface TagListDto {
@@ -18,6 +20,12 @@ const TagTab = () => {
     const [tagList, setTagList] = React.useState<TagListDto[]>([]);
 
     const [modalCreate, setModalCreate] = React.useState<boolean>(false);
+
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const queryPage = parseInt(searchParams.get('page') || '1');
+    const queryCategory = searchParams.get('category') ?? '';
+    const [totalPage, setTotalPage] = useState<number>(1);
 
     interface ModalEditDto {
         id: string;
@@ -255,8 +263,11 @@ const TagTab = () => {
     useEffect(() => {
         const fetchTags = async () => {
             try {
-                const response = await axiosInstance.get('/tag');
-                setTagList([...response.data]);
+                const response = await axiosInstance.get(
+                    `/tag?page=${queryPage > 0 ? queryPage : 1}&${queryCategory ? 'category=' + queryCategory : ''}`,
+                );
+                setTagList([...response.data.tags]);
+                setTotalPage(response.data.totalPage);
             } catch (e) {
                 toast.error(`${e}`, {
                     position: 'top-right',
@@ -272,10 +283,45 @@ const TagTab = () => {
             }
         };
         fetchTags();
-    }, [reloadAction]);
+    }, [reloadAction, searchParams, queryPage, queryCategory]);
+
+    ////
+
+    const changePage = (value: number) => {
+        const newPageNum = value;
+        console.log(newPageNum);
+        if (newPageNum > 0) {
+            searchParams.set('page', newPageNum.toString());
+            setSearchParams(searchParams);
+        } else {
+            searchParams.set('page', '1');
+            setSearchParams(searchParams);
+        }
+        setReloadAction((r) => !r);
+    };
 
     return (
         <ManageTabLayout title="Tag" createNewFunc={() => setModalCreate(true)}>
+            <div className="mb-2">
+                <Form.Select
+                    defaultValue={queryCategory}
+                    onChange={(e) => {
+                        console.log(e.target.value);
+                        searchParams.set('category', e.target.value);
+                        setSearchParams(searchParams);
+                        setReloadAction((r) => !r);
+                    }}
+                >
+                    <option value="">All category</option>
+                    {listCate.map((cate, i) => {
+                        return (
+                            <option key={`cate-${i}`} value={cate.id}>
+                                {cate.cateName}
+                            </option>
+                        );
+                    })}
+                </Form.Select>
+            </div>
             <div className="data-list">
                 <div className="container">
                     <div className="row">
@@ -330,6 +376,7 @@ const TagTab = () => {
                     </div>
                 </div>
             </div>
+            <Pagination changePageFunc={changePage} currentPage={queryPage} totalPage={totalPage} />
             {/* Create modal */}
             <Modal
                 show={modalCreate}
