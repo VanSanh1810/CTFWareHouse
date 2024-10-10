@@ -10,6 +10,8 @@ import { ConfigService } from '@nestjs/config';
 import { extname } from 'path';
 import { UpdateChallTagDto } from './dto/update-chall-tag.dto';
 import { FindChallQueryDto } from './dto/find-chall-query.dto';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class ChallService {
@@ -23,9 +25,11 @@ export class ChallService {
   async create(createChallDto: CreateChallDto, file: Express.Multer.File) {
     try {
       console.log(createChallDto);
-      const cate = await this.cateRepository.findOneBy({
-        id: createChallDto.category,
-      });
+      const cate = createChallDto.category
+        ? await this.cateRepository.findOneBy({
+            id: createChallDto.category,
+          })
+        : null;
 
       const tags = [
         ...(await Promise.all(
@@ -129,10 +133,7 @@ export class ChallService {
           HttpStatus.NOT_FOUND,
         );
       }
-      throw new HttpException(
-        'Internal Server Error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException(`${e}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -142,32 +143,9 @@ export class ChallService {
         id: id,
       });
 
-      const removeTags = [
-        ...(await Promise.all(
-          updateChallTagDto.removetags.map(async (tag) => {
-            const _tags = await this.tagRepository.findOneByOrFail({ id: tag });
-            return _tags;
-          }),
-        )),
-      ];
-
-      if (
-        currentChall.tags &&
-        currentChall.tags.length > 0 &&
-        removeTags.length > 0
-      ) {
-        removeTags.map((tTag) => {
-          for (let i = 0; i < currentChall.tags.length; i++) {
-            if (currentChall.tags[i].id === tTag.id) {
-              currentChall.tags.splice(i, 1); // Xóa 1 phần tử tại vị trí i
-            }
-          }
-        });
-      }
-
       const newTags = [
         ...(await Promise.all(
-          updateChallTagDto.newtags.map(async (tag) => {
+          JSON.parse(updateChallTagDto.newtags).map(async (tag) => {
             if (typeof tag === 'object') {
               return await this.tagRepository.create({
                 tagName: tag.tagName,
@@ -185,14 +163,52 @@ export class ChallService {
       ];
 
       if (newTags && newTags.length > 0) {
-        currentChall.tags.concat(newTags);
+        currentChall.tags = newTags;
       }
 
       return await this.challRepository.save(currentChall);
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         throw new HttpException(
-          'Reference resource not found',
+          'Reference resource not found ' + e,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateForFile(id: string, file: Express.Multer.File) {
+    try {
+      const currentChall = await this.challRepository.findOneByOrFail({
+        id: id,
+      });
+
+      const fullPath = path.resolve(currentChall.staticFileUrl.slice(1));
+
+      fs.unlink(fullPath.trim(), (err) => {
+        if (err) {
+          console.error(`Error deleting file: ${err.message}`);
+        } else {
+          console.log(`File ${fullPath} deleted successfully`);
+        }
+      });
+
+      currentChall.staticFileName =
+        currentChall.challName + extname(file.filename);
+      currentChall.staticFileUrl = `${this.configService.get<string>(
+        'STORAGE_DIR',
+        '/uploads',
+      )}${this.configService.get<string>('CHALLENGE_DIR', '/challenges')}/${file.filename}`;
+
+      return await this.challRepository.save(currentChall);
+    } catch (e) {
+      if (e instanceof EntityNotFoundError) {
+        throw new HttpException(
+          'Reference resource not found ' + e,
           HttpStatus.NOT_FOUND,
         );
       }

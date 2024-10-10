@@ -106,7 +106,7 @@ export class TagService {
   async remove(id: string) {
     try {
       const currentTag = await this.tagRepository.findOne({
-        relations: ['challenge'],
+        relations: ['challenges'],
         where: { id: id },
       });
       if (currentTag.challenges && currentTag.challenges.length > 0) {
@@ -123,6 +123,9 @@ export class TagService {
           'Category resource not found',
           HttpStatus.NOT_FOUND,
         );
+      }
+      if (e instanceof HttpException) {
+        throw e;
       }
       throw new HttpException(
         'Internal Server Error',
