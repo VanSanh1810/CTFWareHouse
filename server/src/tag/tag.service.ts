@@ -4,7 +4,6 @@ import { UpdateTagDto } from './dto/update-tag.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Tag } from 'src/TypeORM/Entities/Tags.entity';
 import { EntityNotFoundError, Repository } from 'typeorm';
-import { Challenge } from 'src/TypeORM/Entities/Challenge.entity';
 import { Category } from 'src/TypeORM/Entities/Category.entity';
 import { FindTagQueryDto } from './dto/find-tag-query.dto';
 
@@ -12,7 +11,6 @@ import { FindTagQueryDto } from './dto/find-tag-query.dto';
 export class TagService {
   constructor(
     @InjectRepository(Tag) private tagRepository: Repository<Tag>,
-    // @InjectRepository(Challenge) private challRepository: Repository<Challenge>,
     @InjectRepository(Category) private cateRepository: Repository<Category>,
   ) {}
 
@@ -43,14 +41,33 @@ export class TagService {
   }
 
   async findAll(query: FindTagQueryDto) {
-    const where: any = {};
-    if (query.category !== null && query.category !== undefined) {
-      where.category = await this.cateRepository.findOneByOrFail({
+    const queryBuilder = this.tagRepository
+      .createQueryBuilder('tag')
+      .leftJoinAndSelect('tag.category', 'category')
+      .limit(16)
+      .offset(((query.page ? query.page : 1) - 1) * 16);
+
+    if (query.category !== undefined && query.category !== null) {
+      const queryCate = await this.cateRepository.findOneBy({
         id: query.category,
       });
+      if (queryCate) {
+        queryBuilder.andWhere('tag.category.id = :queryCate', {
+          queryCate: queryCate.id,
+        });
+      }
     }
 
-    return await this.tagRepository.find({ relations: ['category'], where });
+    if (query.name) {
+      queryBuilder.andWhere('tag.tagName LIKE :name', {
+        name: `%${query.name}%`,
+      }); // tìm kiếm với LIKE
+    }
+
+    return {
+      tags: [...(await queryBuilder.getMany())],
+      totalPage: Math.ceil((await queryBuilder.getCount()) / 16),
+    };
   }
 
   async findOne(id: string) {
@@ -88,7 +105,10 @@ export class TagService {
 
   async remove(id: string) {
     try {
-      const currentTag = await this.tagRepository.findOneByOrFail({ id: id });
+      const currentTag = await this.tagRepository.findOne({
+        relations: ['challenges'],
+        where: { id: id },
+      });
       if (currentTag.challenges && currentTag.challenges.length > 0) {
         throw new HttpException(
           'Tag still have some challenges with it !',
@@ -103,6 +123,9 @@ export class TagService {
           'Category resource not found',
           HttpStatus.NOT_FOUND,
         );
+      }
+      if (e instanceof HttpException) {
+        throw e;
       }
       throw new HttpException(
         'Internal Server Error',
