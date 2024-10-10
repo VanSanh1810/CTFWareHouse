@@ -1,10 +1,19 @@
 export interface ChallData {
-    challId: string;
-    title: string;
-    category: string;
-    bookmarked: boolean;
-    credit: {
-        name: string;
-        url: string;
+    id: string;
+    challName: string;
+    category: {
+        id: string;
+        cateName: string;
     };
+    tags: [
+        {
+            id: string;
+            tagName: string;
+        },
+    ];
+    description: string;
+    source: string;
+    sourceUrl: string;
+    staticFileName: string;
+    staticFileUrl: string;
 }

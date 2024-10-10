@@ -290,7 +290,7 @@ const TagTab = () => {
     const changePage = (value: number) => {
         const newPageNum = value;
         console.log(newPageNum);
-        if (newPageNum > 0) {
+        if (newPageNum > 0 && newPageNum <= totalPage) {
             searchParams.set('page', newPageNum.toString());
             setSearchParams(searchParams);
         } else {
@@ -376,7 +376,7 @@ const TagTab = () => {
                     </div>
                 </div>
             </div>
-            <Pagination changePageFunc={changePage} currentPage={queryPage} totalPage={totalPage} />
+            {totalPage > 1 ? <Pagination changePageFunc={changePage} currentPage={queryPage} totalPage={totalPage} /> : null}
             {/* Create modal */}
             <Modal
                 show={modalCreate}

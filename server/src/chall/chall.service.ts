@@ -82,10 +82,10 @@ export class ChallService {
       .leftJoinAndSelect('challenge.tags', 'tag')
       .leftJoinAndSelect('challenge.category', 'category')
       .limit(16)
-      .skip(((query.page ? query.page : 1) - 1) * 16);
+      .offset(((query.page ? query.page : 1) - 1) * 16);
 
-    if (query.category !== undefined && query.category !== null) {
-      const queryCate = await this.cateRepository.findOneByOrFail({
+    if (query.category) {
+      const queryCate = await this.cateRepository.findOneBy({
         id: query.category,
       });
       if (queryCate) {
@@ -106,7 +106,10 @@ export class ChallService {
   }
 
   async findOne(id: string) {
-    return await this.challRepository.findOneBy({ id: id });
+    return await this.challRepository.findOne({
+      where: { id: id },
+      relations: ['category', 'tags'],
+    });
   }
 
   // only category
@@ -234,7 +237,7 @@ export class ChallService {
           console.log(`File ${fullPath} deleted successfully`);
         }
       });
-      
+
       return await this.challRepository.remove(currentChall);
     } catch (e) {
       if (e instanceof EntityNotFoundError) {

@@ -1,16 +1,20 @@
 import * as React from 'react';
 
 export interface ChallCurrentModal {
-    challId: string;
-    title: string;
-    category: string;
-    solveStatus: boolean;
-    bookmarked: boolean;
-    credit: {
-        name: string;
-        url: string;
+    challName: string;
+
+    category: {
+        id: string;
+        cateName: string;
     };
-    badges: string[];
+
+    description: string;
+    source: string;
+
+    sourceUrl: string;
+    staticFileUrl: string;
+    staticFileName: string;
+    tags: [{ id: string; tagName: string }];
 }
 
 export interface AppContextType {

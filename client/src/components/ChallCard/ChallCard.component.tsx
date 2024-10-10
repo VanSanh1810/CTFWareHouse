@@ -15,7 +15,7 @@ const ChallCard = (props: Props) => {
     useEffect(() => {
         const fetchChallData = async () => {
             try {
-                const response = await axiosInstance.get<ChallData>(`/c?id=${props.challId}`);
+                const response = await axiosInstance.get<ChallData>(`/chall/${props.challId}`);
                 console.log(response.data);
                 setChallData(response.data);
             } catch (e) {
@@ -30,28 +30,28 @@ const ChallCard = (props: Props) => {
             selectable
             onClickHandler={() =>
                 openModal({
-                    challId: '1123',
-                    title: '123',
-                    category: 'asvv',
-                    solveStatus: true,
-                    bookmarked: true,
-                    credit: {
-                        name: 'adsad',
-                        url: 'ádsda',
-                    },
-                    badges: ['asd', 'asda'],
+                    challName: challData.challName,
+                    category: challData.category,
+                    tags: challData.tags,
+                    source: challData.source,
+                    sourceUrl: challData.sourceUrl,
+                    staticFileName: challData?.staticFileName,
+                    staticFileUrl: challData?.staticFileUrl,
+                    description: challData?.description,
                 })
             }
         >
             <div className="challcard">
                 <div className="title">
-                    <h6>Web Exploitation</h6>
+                    <h6>{challData?.category.cateName}</h6>
                     <i className="fa-solid fa-check"></i>
                 </div>
                 <div className="challdetail">
-                    <h6>FindMe</h6>
+                    <h6>{challData?.challName}</h6>
                     <div className="credit">
-                        <p>Credit: PicoCTF</p>
+                        <p>
+                            Credit: <a href={challData?.sourceUrl}>{challData?.source}</a>
+                        </p>
                     </div>
                 </div>
             </div>
