@@ -33,6 +33,8 @@ const ChallTab = () => {
     // const [editTagNewName, setEditTagNewName] = React.useState<string>('');
     // const [editTag_newTag, setEditTag_newTag] = React.useState<CreateTagsListDto[]>([]);
     // const [editTag_removeTag, setEditTag_removeTag] = React.useState<string[]>([]);
+
+    const [modalDelete, setModalDelete] = React.useState<string>('');
     ///////////////
 
     const createChallHandler: FormEventHandler<HTMLFormElement> = async (e) => {
@@ -241,7 +243,51 @@ const ChallTab = () => {
         }
     };
     /////
-    ///
+    const deleteChalengeHandler = async () => {
+        try {
+            await axiosInstance.delete(`/chall/${modalDelete}`);
+            toast.success(`Chall deleted !`, {
+                position: 'top-right',
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light',
+                transition: Bounce,
+            });
+            setReloadAction((r) => !r);
+            setModalDelete('');
+        } catch (e) {
+            if (e instanceof AxiosError) {
+                toast.error(`${e.response?.data.message}`, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+            } else {
+                toast.error(`${e}`, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+            }
+        }
+    };
+    ////
     interface CreateTagsListDto {
         id?: string;
         tagName: string;
@@ -509,7 +555,7 @@ const ChallTab = () => {
                                                             </Button>
                                                             <Button
                                                                 variant="outline-danger"
-                                                                // onClick={() => setModalDelete(cate.id)}
+                                                                onClick={() => setModalDelete(chall.id)}
                                                             >
                                                                 <i className="fa-solid fa-trash"></i>
                                                             </Button>
@@ -1059,6 +1105,27 @@ const ChallTab = () => {
                     </Button>
                     <Button variant="primary" onClick={editTagHandler}>
                         Save Changes
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            {/* Delete modal */}
+            <Modal
+                show={!!modalDelete}
+                onHide={() => setModalDelete('')}
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title id="contained-modal-title-vcenter">Delete challenge</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>You sure you want to delete this challenge ?</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" onClick={deleteChalengeHandler}>
+                        Delete
+                    </Button>
+                    <Button variant="secondary" onClick={() => setModalDelete('')}>
+                        Close
                     </Button>
                 </Modal.Footer>
             </Modal>

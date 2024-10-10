@@ -225,7 +225,17 @@ export class ChallService {
         id: id,
       });
 
-      return await this.challRepository.softRemove(currentChall);
+      const fullPath = path.resolve(currentChall.staticFileUrl.slice(1));
+
+      fs.unlink(fullPath.trim(), (err) => {
+        if (err) {
+          console.error(`Error deleting file: ${err.message}`);
+        } else {
+          console.log(`File ${fullPath} deleted successfully`);
+        }
+      });
+      
+      return await this.challRepository.remove(currentChall);
     } catch (e) {
       if (e instanceof EntityNotFoundError) {
         throw new HttpException(
@@ -233,8 +243,11 @@ export class ChallService {
           HttpStatus.NOT_FOUND,
         );
       }
+      if (e instanceof HttpException) {
+        throw e;
+      }
       throw new HttpException(
-        'Internal Server Error',
+        'Internal Server Error' + e,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
