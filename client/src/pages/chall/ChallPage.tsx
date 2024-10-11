@@ -62,7 +62,7 @@ const SearchFillter = (props: SearchFillterProps) => {
     return (
         <>
             <CardBox>
-                <Form.Check // prettier-ignore
+                {/* <Form.Check // prettier-ignore
                     type="checkbox"
                     id="hideshow-switch"
                     label="Hide Solved"
@@ -82,7 +82,7 @@ const SearchFillter = (props: SearchFillterProps) => {
                         setSearchParams(searchParams);
                     }}
                     defaultValue={searchParams.get('bookmark') ?? 1}
-                />
+                /> */}
                 <h4 className="mt-4" style={{ userSelect: 'none' }}>
                     Category
                 </h4>
