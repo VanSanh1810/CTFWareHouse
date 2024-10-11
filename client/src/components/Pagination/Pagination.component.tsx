@@ -1,6 +1,3 @@
-import React from 'react';
-import { Button } from '../Button';
-
 type Props = {
     totalPage: number;
     currentPage: number;

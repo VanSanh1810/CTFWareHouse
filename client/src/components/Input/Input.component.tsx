@@ -1,5 +1,3 @@
-import React from 'react';
-
 type Props = {
     type: 'text' | 'number' | 'checkbox' | 'radio';
 };

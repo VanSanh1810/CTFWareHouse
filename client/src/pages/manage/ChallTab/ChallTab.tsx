@@ -5,10 +5,23 @@ import { Bounce, toast } from 'react-toastify';
 import { Badge, Button, Card, Container, Form, InputGroup, Modal } from 'react-bootstrap';
 import { AxiosError } from 'axios';
 import { debounce } from 'lodash';
-import { Link } from 'react-router-dom';
 
 const ChallTab = () => {
-    const [listChall, setListChall] = React.useState([]);
+    interface ChallListDto {
+        id: string;
+        category?: {
+            id: string;
+            cateName: string;
+        };
+        challName: string;
+        description: string;
+        source: string;
+        sourceUrl: string;
+        staticFileName: string;
+        staticFileUrl: string;
+        tags: [{ id?: string; tagName: string; category?: string }];
+    }
+    const [listChall, setListChall] = React.useState<ChallListDto[]>([]);
     interface CategoryListDto {
         id: string;
         cateName: string;
@@ -27,12 +40,9 @@ const ChallTab = () => {
     const [reloadAction, setReloadAction] = React.useState<boolean>(false);
     //////////
     const [createModal, setCreateModal] = React.useState<boolean>(false);
-    const [editModal, setEditModal] = React.useState<object>({});
+    const [editModal, setEditModal] = React.useState<ChallListDto>();
 
-    const [editTagModal, setEditTagModal] = React.useState<object>({});
-    // const [editTagNewName, setEditTagNewName] = React.useState<string>('');
-    // const [editTag_newTag, setEditTag_newTag] = React.useState<CreateTagsListDto[]>([]);
-    // const [editTag_removeTag, setEditTag_removeTag] = React.useState<string[]>([]);
+    const [editTagModal, setEditTagModal] = React.useState<ChallListDto>();
 
     const [modalDelete, setModalDelete] = React.useState<string>('');
     ///////////////
@@ -186,7 +196,7 @@ const ChallTab = () => {
                     source: hostInput.value.trim(),
                     sourceUrl: urlInput.value.trim(),
                 };
-                await axiosInstance.patch(`/chall/${editModal.id}`, challUpdateDto);
+                await axiosInstance.patch(`/chall/${editModal?.id}`, challUpdateDto);
                 toast.success('Challenge update !', {
                     position: 'top-right',
                     autoClose: 5000,
@@ -199,7 +209,7 @@ const ChallTab = () => {
                     transition: Bounce,
                 });
                 setReloadAction((r) => !r);
-                setEditModal({});
+                setEditModal(undefined);
             } catch (e) {
                 console.log(e);
                 if (e instanceof AxiosError) {
@@ -488,11 +498,13 @@ const ChallTab = () => {
                 }
             });
 
-            await axiosInstance.patch(`/chall/tag/${editTagModal?.id}`, { newtags: JSON.stringify([...tagToEdit]) });
+            await axiosInstance.patch(`/chall/tag/${editTagModal?.id}`, {
+                newtags: JSON.stringify(tagToEdit && tagToEdit.length > 0 ? [...tagToEdit] : []),
+            });
 
             setReloadAction((r) => !r);
             setTagNameForFind('');
-            setEditTagModal({});
+            setEditTagModal(undefined);
         } catch (e) {
             toast.error(`Unexpecting error ${e}`, {
                 position: 'top-right',
@@ -531,10 +543,10 @@ const ChallTab = () => {
                                                 <tr className="align-middle" key={rowIndex}>
                                                     <td>{chall.id}</td>
                                                     <td>{chall.challName}</td>
-                                                    <td>{chall.category.cateName}</td>
+                                                    <td>{chall?.category?.cateName}</td>
                                                     <td>
                                                         {chall.tags.map((tag, i) => {
-                                                            return <Badge>{tag.tagName}</Badge>;
+                                                            return <Badge key={`badge-${i}`}>{tag.tagName}</Badge>;
                                                         })}
                                                     </td>
                                                     <td className="text-end">
@@ -754,12 +766,14 @@ const ChallTab = () => {
                         <Form
                             onSubmit={(e) => {
                                 e.preventDefault();
-                                // alert(e.target.c_tag_name.value);
-                                // alert(e.target.c_tag_cate.value);
-                                if (e.target.c_tag_name.value?.trim()) {
+                                const target = e.target as HTMLFormElement;
+                                const tagName = target.c_tag_name.value?.trim();
+                                const category = target.c_tag_cate.value?.trim();
+
+                                if (tagName) {
                                     addTagToCreate({
-                                        tagName: e.target.c_tag_name.value.trim(),
-                                        category: e.target.c_tag_cate.value.trim(),
+                                        tagName,
+                                        category,
                                     });
                                 }
                             }}
@@ -808,7 +822,7 @@ const ChallTab = () => {
             {/* Edit modal */}
             <Modal
                 show={!!editModal?.id}
-                onHide={() => setEditModal({})}
+                onHide={() => setEditModal(undefined)}
                 size="lg"
                 aria-labelledby="contained-modal-title-vcenter"
                 centered
@@ -891,11 +905,12 @@ const ChallTab = () => {
                         <Form
                             onSubmit={async (e) => {
                                 e.preventDefault();
-                                console.log(e.target.challFile.files[0]);
+                                const target = e.target as HTMLFormElement;
+                                console.log(target.challFile.files[0]);
 
                                 try {
                                     const formData = new FormData();
-                                    formData.append('file', e.target.challFile.files[0]);
+                                    formData.append('file', target.challFile.files[0]);
                                     await axiosInstance.patch(`/chall/file/${editModal?.id}`, formData, {
                                         headers: {
                                             'Content-Type': 'multipart/form-data',
@@ -903,7 +918,7 @@ const ChallTab = () => {
                                     });
                                     setReloadAction((r) => !r);
                                     setTagNameForFind('');
-                                    setEditModal({});
+                                    setEditModal(undefined);
                                 } catch (e) {
                                     toast.error('Error: ' + e, {
                                         position: 'top-right',
@@ -932,7 +947,7 @@ const ChallTab = () => {
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setEditModal({})}>
+                    <Button variant="secondary" onClick={() => setEditModal(undefined)}>
                         Close
                     </Button>
                 </Modal.Footer>
@@ -942,7 +957,7 @@ const ChallTab = () => {
                 show={!!editTagModal?.id}
                 onHide={() => {
                     setTagNameForFind('');
-                    setEditTagModal({});
+                    setEditTagModal(undefined);
                 }}
             >
                 <Modal.Header closeButton>
@@ -1036,7 +1051,10 @@ const ChallTab = () => {
                                                         setEditTagModal((old) => {
                                                             return {
                                                                 ...old,
-                                                                tags: [...old.tags, { id: tag.id, tagName: tag.tagName }],
+                                                                tags: [
+                                                                    ...(old?.tags ? old.tags : []),
+                                                                    { id: tag.id, tagName: tag.tagName },
+                                                                ],
                                                             };
                                                         })
                                                     }
@@ -1057,15 +1075,16 @@ const ChallTab = () => {
                         <Form
                             onSubmit={(e) => {
                                 e.preventDefault();
-                                if (e.target.c_tag_name.value?.trim()) {
+                                const target = e.target as HTMLFormElement;
+                                if (target.c_tag_name.value?.trim()) {
                                     setEditTagModal((old) => {
                                         return {
                                             ...old,
                                             tags: [
                                                 ...old.tags,
                                                 {
-                                                    tagName: e.target.c_tag_name.value.trim(),
-                                                    category: e.target.c_tag_cate.value.trim(),
+                                                    tagName: target.c_tag_name.value.trim(),
+                                                    category: target.c_tag_cate.value.trim(),
                                                 },
                                             ],
                                         };
@@ -1098,7 +1117,7 @@ const ChallTab = () => {
                         variant="secondary"
                         onClick={() => {
                             setTagNameForFind('');
-                            setEditTagModal({});
+                            setEditTagModal(undefined);
                         }}
                     >
                         Close

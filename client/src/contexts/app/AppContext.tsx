@@ -1,20 +1,20 @@
 import * as React from 'react';
 
 export interface ChallCurrentModal {
-    challName: string;
+    challName?: string;
 
-    category: {
-        id: string;
-        cateName: string;
+    category?: {
+        id?: string;
+        cateName?: string;
     };
 
-    description: string;
-    source: string;
+    description?: string;
+    source?: string;
 
-    sourceUrl: string;
-    staticFileUrl: string;
-    staticFileName: string;
-    tags: [{ id: string; tagName: string }];
+    sourceUrl?: string;
+    staticFileUrl?: string;
+    staticFileName?: string;
+    tags?: [{ id: string; tagName: string }];
 }
 
 export interface AppContextType {

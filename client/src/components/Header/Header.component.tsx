@@ -1,9 +1,6 @@
-import React from 'react';
 import { Button, Container, Form, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 
-type Props = {};
-
-const Header = (props: Props) => {
+const Header = () => {
     return (
         <>
             <Navbar expand="lg" className="bg-body-tertiary">
