@@ -1,16 +1,9 @@
-import React from 'react';
-import { Card } from '../../components/Card';
-import { Input } from '../../components/Input';
-import { Button, Col, Container, Row } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 
-interface Props {}
-
-const HomePage: React.FC<Props> = () => {
+const HomePage = () => {
     return (
         <Container>
-            <div>
-                11111
-            </div>
+            <div>11111</div>
             <div>
                 Lorem ipsum dolor, sit amet consectetur adipisicing elit. Omnis placeat voluptatibus porro velit debitis numquam,
                 error soluta labore molestias exercitationem quam ipsum, tempore aspernatur libero quo possimus quisquam harum

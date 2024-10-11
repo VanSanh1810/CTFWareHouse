@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Collapse, Container, Row } from 'react-bootstrap';
 import { Header } from '../components/Header';
 
@@ -12,13 +12,6 @@ const MainLayout = (props: Props) => {
 
     useEffect(() => {
         const handleScroll = () => {
-            // if (event.deltaY < 0) {
-            //     // console.log('Lăn chuột lên');
-            //     setOpen(true);
-            // } else {
-            //     // console.log('Lăn chuột xuống');
-            //     setOpen(false);
-            // }
             setScrollPos((oldPost) => {
                 if (oldPost > window.scrollY) {
                     //up
@@ -45,6 +38,7 @@ const MainLayout = (props: Props) => {
             <Collapse in={open}>
                 <Row className="w-100" style={{ position: 'fixed', zIndex: 1000 }}>
                     <Header />
+                    <p style={{ display: 'none' }}>{scrollPos}</p>
                 </Row>
             </Collapse>
             <Row style={{ paddingTop: '80px' }} className="px-5">

@@ -1,17 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Col, Container, ListGroup, Row } from 'react-bootstrap';
 import { CardBox } from '../../components/CardBox';
-import ManageTabLayout from '../../layouts/ManageTabLayout';
 import { useSearchParams } from 'react-router-dom';
 
 import { CategoryTab } from './CategoryTab';
 import { TagTab } from './TagTab';
 import { ChallTab } from './ChallTab';
 
-type Props = {};
-
-const ManagePage = (props: Props) => {
-    const [searchParams, setSearchParams] = useSearchParams();
+const ManagePage = () => {
+    const [searchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState<number>(parseInt(searchParams.get('tab') || '1'));
 
     const renderComponent = () => {
