@@ -19,7 +19,7 @@ const ChallTab = () => {
         sourceUrl: string;
         staticFileName: string;
         staticFileUrl: string;
-        tags: [{ id?: string; tagName: string; category?: string }];
+        tags: { id?: string; tagName: string; category?: string }[];
     }
     const [listChall, setListChall] = React.useState<ChallListDto[]>([]);
     interface CategoryListDto {
@@ -42,7 +42,7 @@ const ChallTab = () => {
     const [createModal, setCreateModal] = React.useState<boolean>(false);
     const [editModal, setEditModal] = React.useState<ChallListDto>();
 
-    const [editTagModal, setEditTagModal] = React.useState<ChallListDto>();
+    const [editTagModal, setEditTagModal] = React.useState<ChallListDto>(undefined);
 
     const [modalDelete, setModalDelete] = React.useState<string>('');
     ///////////////
@@ -988,8 +988,6 @@ const ChallTab = () => {
                                                         (t) => t.category !== tag.category || t.tagName !== tag.tagName,
                                                     );
                                                 }
-                                                console.log(_nTag);
-                                                console.log(old);
                                                 return {
                                                     ...old,
                                                     tags: [..._nTag],
@@ -1047,17 +1045,19 @@ const ChallTab = () => {
                                                         padding: '0.5rem',
                                                         borderRadius: '0.2rem',
                                                     }}
-                                                    onClick={() =>
-                                                        setEditTagModal((old) => {
-                                                            return {
-                                                                ...old,
-                                                                tags: [
-                                                                    ...(old?.tags ? old.tags : []),
-                                                                    { id: tag.id, tagName: tag.tagName },
-                                                                ],
-                                                            };
-                                                        })
-                                                    }
+                                                    onClick={() => {
+                                                        if (editTagModal.id) {
+                                                            setEditTagModal((old) => {
+                                                                return {
+                                                                    ...old,
+                                                                    tags: [
+                                                                        ...(old?.tags ? old.tags : []),
+                                                                        { id: tag.id, tagName: tag.tagName },
+                                                                    ],
+                                                                };
+                                                            });
+                                                        }
+                                                    }}
                                                 >
                                                     <span>{tag.tagName}</span>
                                                     <span>Category: {tag.category?.cateName || 'No Category'}</span>
