@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Badge, Button, Col, Container, ListGroup, Modal, Row } from 'react-bootstrap';
+import React, { ReactNode, useEffect, useState } from 'react';
+import { Badge, Button, Col, Container, ListGroup, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { CardBox } from '../../components/CardBox';
 import { Pagination } from '../../components/Pagination';
 import { ChallCard } from '../../components/ChallCard';
@@ -8,6 +8,7 @@ import { useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../services/Axios';
 import { Bounce, toast } from 'react-toastify';
 import { CategoryDto } from '../../types/Dtos/category.dto';
+import { TagDto } from '../../types/Dtos/tag.dto';
 
 const ChallPage = () => {
     return (
@@ -33,6 +34,8 @@ const SearchFillter = () => {
     const [selectedCate, setSelectedCate] = useState<string>('');
     const [listCate, setListCate] = useState<CategoryDto[]>([]);
 
+    const [tag, setTag] = useState<TagDto>();
+
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -55,7 +58,33 @@ const SearchFillter = () => {
         fetchCategories();
     }, []);
 
-    // Lấy giá trị của tham số 'paramName'
+    useEffect(() => {
+        const fetchTags = async () => {
+            try {
+                const response = await axiosInstance.get(`/tag/${searchParams.get('tags')}`);
+                setTag(response.data);
+            } catch (e) {
+                toast.error(`${e}`, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                    transition: Bounce,
+                });
+            }
+        };
+        fetchTags();
+    }, [searchParams]);
+
+    const MyToolTip = (props: { id: string; children: ReactNode; title: string }) => (
+        <OverlayTrigger overlay={<Tooltip id={props.id}>{props.title}</Tooltip>}>
+            <a href="#">{props.children}</a>
+        </OverlayTrigger>
+    );
 
     return (
         <>
@@ -92,6 +121,22 @@ const SearchFillter = () => {
                         );
                     })}
                 </ListGroup>
+                {tag?.id ? (
+                    <div className="mt-3 d-flex flex-row">
+                        <p className="me-2">Current selected tag:</p>
+                        <MyToolTip title="Click to remove filter" id="t-1">
+                            <Badge
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => {
+                                    searchParams.set('tags', '');
+                                    setSearchParams(searchParams);
+                                }}
+                            >
+                                {tag?.tagName}
+                            </Badge>
+                        </MyToolTip>
+                    </div>
+                ) : null}
             </CardBox>
         </>
     );
@@ -101,6 +146,7 @@ const ChallList = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const queryPage = parseInt(searchParams.get('page') || '1');
+    const queryTags = searchParams.get('tags');
     const queryCategory = searchParams.get('category');
     const queryHideSolve = searchParams.get('hidesolve');
     const queryBookmark = searchParams.get('bookmark');
@@ -113,7 +159,9 @@ const ChallList = () => {
     useEffect(() => {
         const fetchChall = async () => {
             try {
-                const response = await axiosInstance.get(`/chall?page=${queryPage}&category=${queryCategory}`);
+                const response = await axiosInstance.get(
+                    `/chall?page=${queryPage}&category=${queryCategory}&tags=${queryTags || ''}`,
+                );
                 setChallList([...response.data.challenges]);
                 setTotalPage(response.data.totalPage);
             } catch (e) {
@@ -122,7 +170,7 @@ const ChallList = () => {
         };
         fetchChall();
         // alert([queryPage, queryCategory, queryHideSolve, queryBookmark]);
-    }, [reloadAction, queryPage, queryCategory, queryHideSolve, queryBookmark]);
+    }, [reloadAction, queryPage, queryCategory, queryHideSolve, queryBookmark, queryTags]);
 
     const changePage = (value: number) => {
         const newPageNum = value;
@@ -161,6 +209,7 @@ const ChallList = () => {
 };
 
 const ChallModal = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const { closeModal, currentChallModal } = React.useContext(AppContext) as AppContextType;
 
     const [isBookmarked, setIsBookmarked] = React.useState<boolean>(false);
@@ -175,7 +224,14 @@ const ChallModal = () => {
                     <div className="tag-list">
                         {currentChallModal?.tags?.map((tag, i) => {
                             return (
-                                <Badge key={`tag-${i}-${currentChallModal?.challName}`} bg="primary">
+                                <Badge
+                                    key={`tag-${i}-${currentChallModal?.challName}`}
+                                    bg="primary"
+                                    onClick={() => {
+                                        searchParams.set('tags', tag.id);
+                                        setSearchParams(searchParams);
+                                    }}
+                                >
                                     {tag.tagName}
                                 </Badge>
                             );

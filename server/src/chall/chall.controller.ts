@@ -10,9 +10,7 @@ import {
   UploadedFile,
   HttpException,
   HttpStatus,
-  UsePipes,
   Query,
-  ValidationPipe,
 } from '@nestjs/common';
 import { ChallService } from './chall.service';
 import { CreateChallDto } from './dto/create-chall.dto';

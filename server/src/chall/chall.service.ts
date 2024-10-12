@@ -96,8 +96,14 @@ export class ChallService {
     }
 
     if (query.tags && query.tags.length > 0) {
-      const tagIds = [...query.tags];
-      queryBuilder.andWhere('tag.id IN (:...tagIds)', { tagIds });
+      try {
+        const lTags = [...JSON.parse(query.tags)];
+        const tagIds = [...lTags];
+        queryBuilder.andWhere('tag.id IN (:...tagIds)', { tagIds });
+      } catch (e) {
+        const singleTag = query.tags;
+        queryBuilder.andWhere('tag.id = :singleTag', { singleTag });
+      }
     }
     return {
       challenges: [...(await queryBuilder.getMany())],

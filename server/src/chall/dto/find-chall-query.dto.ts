@@ -1,5 +1,5 @@
 import { Transform, Type } from 'class-transformer';
-import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class FindChallQueryDto {
   @IsOptional()
@@ -7,9 +7,8 @@ export class FindChallQueryDto {
   category?: string;
 
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
+  @IsString()
+  tags?: string;
 
   @IsOptional()
   @Type(() => Number) // Chuyển đổi page thành number

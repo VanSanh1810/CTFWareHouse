@@ -8,18 +8,18 @@ import { debounce } from 'lodash';
 
 const ChallTab = () => {
     interface ChallListDto {
-        id: string;
+        id?: string;
         category?: {
             id: string;
             cateName: string;
         };
-        challName: string;
-        description: string;
-        source: string;
-        sourceUrl: string;
-        staticFileName: string;
-        staticFileUrl: string;
-        tags: { id?: string; tagName: string; category?: string }[];
+        challName?: string;
+        description?: string;
+        source?: string;
+        sourceUrl?: string;
+        staticFileName?: string;
+        staticFileUrl?: string;
+        tags?: { id?: string; tagName: string; category?: string }[];
     }
     const [listChall, setListChall] = React.useState<ChallListDto[]>([]);
     interface CategoryListDto {
@@ -42,7 +42,7 @@ const ChallTab = () => {
     const [createModal, setCreateModal] = React.useState<boolean>(false);
     const [editModal, setEditModal] = React.useState<ChallListDto>();
 
-    const [editTagModal, setEditTagModal] = React.useState<ChallListDto>(undefined);
+    const [editTagModal, setEditTagModal] = React.useState<ChallListDto>();
 
     const [modalDelete, setModalDelete] = React.useState<string>('');
     ///////////////
@@ -490,7 +490,7 @@ const ChallTab = () => {
         try {
             console.log(editTagModal);
 
-            const tagToEdit = editTagModal?.tags.map((tag) => {
+            const tagToEdit = editTagModal?.tags?.map((tag) => {
                 if (tag.id) {
                     return tag.id;
                 } else {
@@ -545,7 +545,7 @@ const ChallTab = () => {
                                                     <td>{chall.challName}</td>
                                                     <td>{chall?.category?.cateName}</td>
                                                     <td>
-                                                        {chall.tags.map((tag, i) => {
+                                                        {chall?.tags?.map((tag, i) => {
                                                             return <Badge key={`badge-${i}`}>{tag.tagName}</Badge>;
                                                         })}
                                                     </td>
@@ -567,7 +567,7 @@ const ChallTab = () => {
                                                             </Button>
                                                             <Button
                                                                 variant="outline-danger"
-                                                                onClick={() => setModalDelete(chall.id)}
+                                                                onClick={() => setModalDelete(chall?.id || '')}
                                                             >
                                                                 <i className="fa-solid fa-trash"></i>
                                                             </Button>
@@ -978,20 +978,22 @@ const ChallTab = () => {
                                         className="fa-solid fa-x ms-2"
                                         onClick={() => {
                                             setEditTagModal((old) => {
-                                                let _nTag;
-                                                if (tag.id) {
-                                                    _nTag = [...old.tags].filter(
-                                                        (t) => t.id !== tag.id || t.tagName !== tag.tagName,
-                                                    );
-                                                } else {
-                                                    _nTag = [...old.tags].filter(
-                                                        (t) => t.category !== tag.category || t.tagName !== tag.tagName,
-                                                    );
+                                                if (old?.tags) {
+                                                    let _nTag;
+                                                    if (tag.id) {
+                                                        _nTag = [...old.tags].filter(
+                                                            (t) => t.id !== tag.id || t.tagName !== tag.tagName,
+                                                        );
+                                                    } else {
+                                                        _nTag = [...old.tags].filter(
+                                                            (t) => t.category !== tag.category || t.tagName !== tag.tagName,
+                                                        );
+                                                    }
+                                                    return {
+                                                        ...old,
+                                                        tags: [..._nTag],
+                                                    };
                                                 }
-                                                return {
-                                                    ...old,
-                                                    tags: [..._nTag],
-                                                };
                                             });
                                         }}
                                     ></i>
@@ -1046,7 +1048,7 @@ const ChallTab = () => {
                                                         borderRadius: '0.2rem',
                                                     }}
                                                     onClick={() => {
-                                                        if (editTagModal.id) {
+                                                        if (editTagModal?.id) {
                                                             setEditTagModal((old) => {
                                                                 return {
                                                                     ...old,
@@ -1078,16 +1080,18 @@ const ChallTab = () => {
                                 const target = e.target as HTMLFormElement;
                                 if (target.c_tag_name.value?.trim()) {
                                     setEditTagModal((old) => {
-                                        return {
-                                            ...old,
-                                            tags: [
-                                                ...old.tags,
-                                                {
-                                                    tagName: target.c_tag_name.value.trim(),
-                                                    category: target.c_tag_cate.value.trim(),
-                                                },
-                                            ],
-                                        };
+                                        if (old?.tags) {
+                                            return {
+                                                ...old,
+                                                tags: [
+                                                    ...old.tags,
+                                                    {
+                                                        tagName: target.c_tag_name.value.trim(),
+                                                        category: target.c_tag_cate.value.trim(),
+                                                    },
+                                                ],
+                                            };
+                                        }
                                     });
                                 }
                             }}
