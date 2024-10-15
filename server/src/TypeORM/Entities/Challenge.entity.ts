@@ -1,7 +1,15 @@
 import { AbstractEntity } from 'src/database/abstract.entity';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Category } from './Category.entity';
 import { Tag } from './Tags.entity';
+import { Writeup } from './Writeup.entity';
 
 @Entity()
 export class Challenge extends AbstractEntity<Challenge> {
@@ -31,4 +39,7 @@ export class Challenge extends AbstractEntity<Challenge> {
   })
   @JoinTable()
   tags: Tag[];
+
+  @OneToMany(() => Writeup, (writeup) => writeup.challenge)
+  writeups: Writeup[];
 }
