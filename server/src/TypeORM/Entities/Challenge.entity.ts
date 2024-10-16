@@ -41,5 +41,5 @@ export class Challenge extends AbstractEntity<Challenge> {
   tags: Tag[];
 
   @OneToMany(() => Writeup, (writeup) => writeup.challenge)
-  writeups: Writeup[];
+  writeups?: Writeup[];
 }

@@ -6,6 +6,7 @@ import { CategoryModule } from './category/category.module';
 import { ChallModule } from './chall/chall.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { WriteupModule } from './writeup/writeup.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { join } from 'path';
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
     }),
+    WriteupModule,
   ],
   controllers: [],
   providers: [],
