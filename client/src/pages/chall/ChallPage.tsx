@@ -4,7 +4,7 @@ import { CardBox } from '../../components/CardBox';
 import { Pagination } from '../../components/Pagination';
 import { ChallCard } from '../../components/ChallCard';
 import { AppContext, AppContextType } from '../../contexts/app/AppContext';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../services/Axios';
 import { Bounce, toast } from 'react-toastify';
 import { CategoryDto } from '../../types/Dtos/category.dto';
@@ -250,9 +250,15 @@ const ChallModal = () => {
                     <h5>
                         Credit: <a href={currentChallModal?.sourceUrl}>{currentChallModal?.source}</a>
                     </h5>
-                    <a className="btn btn-primary" href={`${import.meta.env.VITE_SERVER_URL}${currentChallModal?.staticFileUrl}`}>
-                        {currentChallModal?.staticFileName} <i className="fa-solid fa-download"></i>
-                    </a>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <a
+                            className="btn btn-primary"
+                            href={`${import.meta.env.VITE_SERVER_URL}${currentChallModal?.staticFileUrl}`}
+                        >
+                            {currentChallModal?.staticFileName} <i className="fa-solid fa-download"></i>
+                        </a>
+                        <Link to={`/challenge/writeup/${currentChallModal?.id}`}>Writeup</Link>
+                    </div>
                 </div>
             </Modal.Body>
             <Modal.Footer>

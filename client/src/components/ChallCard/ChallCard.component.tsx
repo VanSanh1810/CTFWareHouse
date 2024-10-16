@@ -30,6 +30,7 @@ const ChallCard = (props: Props) => {
             selectable
             onClickHandler={() =>
                 openModal({
+                    id: challData?.id,
                     challName: challData?.challName,
                     category: challData?.category,
                     tags: challData?.tags,

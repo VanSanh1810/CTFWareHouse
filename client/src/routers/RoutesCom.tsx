@@ -3,6 +3,8 @@ import { HomePage } from '../pages/home';
 import MainLayout from '../layouts/MainLayout';
 import { ChallPage } from '../pages/chall';
 import { ManagePage } from '../pages/manage';
+import { NotFoundPage } from '../pages/404';
+import { WriteupPage } from '../pages/writeup';
 
 export const router = createBrowserRouter([
     {
@@ -22,11 +24,23 @@ export const router = createBrowserRouter([
         ),
     },
     {
+        path: '/challenge/writeup/:id?',
+        element: (
+            <MainLayout>
+                <WriteupPage />
+            </MainLayout>
+        ),
+    },
+    {
         path: '/manage',
         element: (
             <MainLayout>
                 <ManagePage />
             </MainLayout>
         ),
+    },
+    {
+        path: '*',
+        element: <NotFoundPage />,
     },
 ]);

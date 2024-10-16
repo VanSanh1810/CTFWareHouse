@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 export interface ChallCurrentModal {
+    id? : string;
     challName?: string;
 
     category?: {
